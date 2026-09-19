@@ -1,0 +1,64 @@
+:root{
+    --j4-white: #f0f3f5;
+    --j4-bg-color: #9effb8;
+    --j4-dark-green: #0f6520;
+    --j4-light-green: #21a01d;
+    --j4-text-black: #212529;
+}
+
+body, html {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: var(--j4-bg-color);
+}
+
+.site-header {
+    /* background-color: red; */
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+}
+
+.content {
+    padding-top: 55px;
+    /*color: var(--j4-text-black);*/
+    margin-bottom: 30px;
+}
+
+.navbar {
+    background-color: var(--j4-dark-green);
+}
+
+.navbar a {
+    font-size: 20px;
+}
+
+.nav-item:hover {
+    text-decoration: underline;
+}
+
+.navbar-brand {
+    color: white;
+    font-size: 25px; /* non funziona ma amen */
+}
+
+.dropdown-menu {
+    background-color: var(--j4-dark-green);
+}
+
+.dropdown-item,
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--j4-dark-green);
+    text-decoration: none;
+}
+
+.container {
+    min-width: 100%; /* necessario, a quanto pare */
+    margin-left: 5px;
+}
+
+.content {
+    margin-top: 10px;
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Jeiquarta",
+    "short_name": "J^4",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#777777",
+    "theme_color": "#777777",
+    "orientation": "portrait"
+}
+

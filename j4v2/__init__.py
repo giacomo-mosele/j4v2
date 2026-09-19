@@ -24,4 +24,4 @@ login_manager.login_view = "login"
 login_manager.login_message = "Per accedere all'area riservata è necessario accedere"
 login_manager.login_message_category = "info"
 
-from tdl import routes
+from j4v2 import routes

@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     nome = db.Column(db.String(32), nullable = False)
     cognome = db.Column(db.String(32), nullable = False)
     email = db.Column(db.String(64), unique = True, nullable = False)
-    username = db.Column(db.String(32), unique = True, nullable = False)
+    username = db.Column(db.String(16), unique = True, nullable = False)
     ruolo = db.Column(db.Integer, nullable = True) # 0 = user, 1 = admin, 2 = developer; -1 = da approvare, -2 = bannato
     hashed_password = db.Column(db.String(32), nullable = False)
 
@@ -150,7 +150,9 @@ class Submission(db.Model):
     risultato = db.Column(db.Integer, nullable = False)
     is_corretta = db.Column(db.Boolean, nullable = False)
     bonus_associato = db.Column(db.Integer, nullable = False)
+
     stato_jolly = db.Column(db.Integer, nullable = False) # 0 = non jolly, 1 = jolly piazzato prima, -1 = jolly piazzato dopo
+    is_scelta_jolly = db.Column(db.Boolean, nullable = False, default = False) # se è True, stato_jolly deve essere 1 o -1
 
     is_enabled = db.Column(db.Boolean, nullable = False, default = True)
 

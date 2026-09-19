@@ -2,7 +2,9 @@
 __pycache__/
 venv/
 instance/
-run.py
 
 ssl/*.pem
 ssl/*.key
+
+run.py
+db_manager.py

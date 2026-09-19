@@ -1,0 +1,13 @@
+legend {
+    color: var(--j4-text-black)
+}
+
+.form-control-label,
+.form-check-label {
+    color: var(--j4-text-black)
+}
+
+.form-control,
+.form-check-input {
+    border: 1px solid var(--j4v2-text-black);
+}

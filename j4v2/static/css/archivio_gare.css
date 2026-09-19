@@ -1,0 +1,11 @@
+.content {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    place-items: center;
+}
+
+h1 {
+    margin-top: 10px;
+    color: var(--j4-text-black);
+}
