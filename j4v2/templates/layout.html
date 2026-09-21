@@ -35,6 +35,13 @@
                     <div class="navbar-nav mr-auto">
                         <a class="nav-item nav-link" href="{{ url_for('calendario') }}">Calendario</a>
                         <a class="nav-item nav-link" href="{{ url_for('archivio_gare') }}">Archivio gare</a>
+                        {% if current_user.is_authenticated and current_user.ruolo >= 0%}
+                            {% if current_user.ruolo == 0 %}
+                                <a class="nav-item nav-link" href="{{ url_for('richiedi_gara') }}">Richiedi una gara</a>
+                            {% else %}
+                                <a class="nav-item nav-link" href="{{ url_for('richiedi_gara') }}">Fissa una gara</a>
+                            {% endif %}
+                        {% endif %}
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav ms-auto">

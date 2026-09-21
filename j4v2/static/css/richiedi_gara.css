@@ -1,0 +1,49 @@
+legend {
+    color: var(--j4-text-black)
+}
+
+.form-control-label,
+.form-check-label {
+    color: var(--j4-text-black)
+}
+
+.form-control,
+.form-check-input {
+    border: 1px solid var(--j4v2-text-black);
+    background-color: #ffffff;
+    color: #1f1f1f;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.form-control:focus,
+.form-check-input:focus {
+    border-color: #4d7cff;
+    box-shadow: 0 0 0 0.2rem rgba(77, 124, 255, 0.15);
+}
+
+.problem-entry,
+.team-entry {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.problem-number,
+.team-number {
+    color: var(--j4-text-black);
+}
+
+.remove-problema:disabled,
+.remove-squadra:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-content {
+    border-radius: 0.75rem;
+}
+
+.modal-body .form-control,
+.modal-body .form-check-input {
+    background-color: #fff;
+}

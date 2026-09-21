@@ -50,12 +50,13 @@ class User(db.Model, UserMixin):
 class Gara(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     titolo = db.Column(db.String(64), nullable = False)
-    unix_start = db.Column(db.BigInteger, nullable = False)
+    unix_start = db.Column(db.BigInteger, nullable = True) # nullable in caso di start manuale
+    start_manuale = db.Column(db.Boolean, nullable = False)
 
     stato = db.Column(db.Integer, nullable = False) # 0 = richiesta, 1 = inserita, 2 = in corso, 3 = terminata
     richiedente_id = db.Column(db.Integer, db.ForeignKey("user.id", name = "fk_gara_richiedente"), nullable = True) # nullable per gli user cancellati
     
-    is_allenamento = db.Column(db.Boolean, nullable = False)
+    is_allenamento = db.Column(db.Boolean, nullable = False, default = False)
     is_pubblica = db.Column(db.Boolean, nullable = False)
     is_modificabile_da_richiedente = db.Column(db.Boolean, nullable = False, default = True)
 

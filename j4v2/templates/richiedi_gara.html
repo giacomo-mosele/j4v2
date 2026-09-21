@@ -1,0 +1,265 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/richiedi_gara.css">
+{% endblock %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="post" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">{{ "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara" }}</legend>
+
+                <!-- TITOLO DELLA GARA -->
+                <div class="form-group mb-4">
+                    {{ form.titolo.label(class="form-control-label") }}
+
+                    {% if form.titolo.errors %}
+                        {{ form.titolo(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.titolo.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.titolo(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <!-- CHECKBOX PER AVVIO MANUALE -->
+                <div class="form-check mt-2 mb-2">
+                    {{ form.start_manuale(class="form-check-input", id="startManualeCheck") }}
+                    {{ form.start_manuale.label(class="form-check-label") }}
+                </div>
+
+                <!-- DATETIME, DURATA, N, FINE INCREMENTO, TEMPO JOLLY, BONUS RISPOSTE, BONUS FULLATO, MINUTI OSCURI, SQUADRE NASCOSTE A FINE GARA -->
+                {% for element in [form.datetime_start, form.durata, form.n, form.fine_incremento, form.tempo_jolly, form.bonus_risposte_string, form.bonus_fullato_string, form.minuti_oscuri, form.top_n_squadre_nascoste] %}
+                    <div class="form-group mb-2">
+                        {{ element.label(class="form-control-label") }}
+
+                        {% if element.errors %}
+                            {{ element(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in element.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ element(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="form-group mb-4">
+                    <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#problemiModal">
+                        Gestisci problemi
+                    </button>
+                </div>
+
+                <!-- MODALE PROBLEMI -->
+                <div class="modal fade" id="problemiModal" tabindex="-1" aria-labelledby="problemiModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="problemiModalLabel">Problemi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                            </div>
+                            <div class="modal-body">
+                                <small class="text-muted d-block mb-3">Lascia i titoli vuoti per generarli automaticamente.</small>
+
+                                <div id="problemi-list">
+                                    {% for problema in form.problemi %}
+                                        <div class="problem-entry border rounded p-3 mb-3" data-index="{{ loop.index0 }}">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="problem-number mb-0">Problema {{ loop.index }}</h6>
+                                                <button type="button" class="btn btn-sm btn-outline-danger remove-problema" {% if form.problemi|length <= 1 %}disabled{% endif %}>Elimina</button>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                {{ problema.titolo.label(class="form-control-label") }}
+                                                {% if problema.titolo.errors %}
+                                                    {{ problema.titolo(class="form-control form-control-lg is-invalid") }}
+                                                    <div class="invalid-feedback">
+                                                        {% for error in problema.titolo.errors %}
+                                                            <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    {{ problema.titolo(class="form-control form-control-lg") }}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-group mb-0">
+                                                {{ problema.risultato.label(class="form-control-label") }}
+                                                {% if problema.risultato.errors %}
+                                                    {{ problema.risultato(class="form-control form-control-lg is-invalid") }}
+                                                    <div class="invalid-feedback">
+                                                        {% for error in problema.risultato.errors %}
+                                                            <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    {{ problema.risultato(class="form-control form-control-lg") }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <template id="problema-template">
+                                    <div class="problem-entry border rounded p-3 mb-3" data-index="__INDEX__">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="problem-number mb-0">Problema __INDEX__</h6>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-problema">Elimina</button>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label for="problemi-__INDEX__-titolo" class="form-control-label">Titolo</label>
+                                            <input type="text" id="problemi-__INDEX__-titolo" name="problemi-__INDEX__-titolo" class="form-control form-control-lg" value="">
+                                        </div>
+
+                                        <div class="form-group mb-0">
+                                            <label for="problemi-__INDEX__-risultato" class="form-control-label">Risultato</label>
+                                            <input type="number" id="problemi-__INDEX__-risultato" name="problemi-__INDEX__-risultato" class="form-control form-control-lg" min="0" max="9999" value="">
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="add-problema" class="btn btn-primary">Aggiungi problema</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#squadreModal">
+                        Gestisci squadre
+                    </button>
+                </div>
+
+                <!-- MODALE SQUADRE -->
+                <div class="modal fade" id="squadreModal" tabindex="-1" aria-labelledby="squadreModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="squadreModalLabel">Squadre</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                            </div>
+                            <div class="modal-body">
+                                <small class="text-muted d-block mb-3">Inserisci i nomi delle squadre che parteciperanno.</small>
+
+                                <div id="squadre-list">
+                                    {% for squadra in form.squadre %}
+                                        <div class="team-entry border rounded p-3 mb-3" data-index="{{ loop.index0 }}">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="team-number mb-0">Squadra {{ loop.index }}</h6>
+                                                <button type="button" class="btn btn-sm btn-outline-danger remove-squadra" {% if form.squadre|length <= 1 %}disabled{% endif %}>Elimina</button>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                {{ squadra.nome.label(class="form-control-label") }}
+                                                {% if squadra.nome.errors %}
+                                                    {{ squadra.nome(class="form-control form-control-lg is-invalid") }}
+                                                    <div class="invalid-feedback">
+                                                        {% for error in squadra.nome.errors %}
+                                                            <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    {{ squadra.nome(class="form-control form-control-lg") }}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-check mb-0">
+                                                {{ squadra.is_ospite(class="form-check-input") }}
+                                                {{ squadra.is_ospite.label(class="form-check-label") }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <template id="squadra-template">
+                                    <div class="team-entry border rounded p-3 mb-3" data-index="__INDEX__">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="team-number mb-0">Squadra __INDEX__</h6>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-squadra">Elimina</button>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label for="squadre-__INDEX__-nome" class="form-control-label">Nome squadra</label>
+                                            <input type="text" id="squadre-__INDEX__-nome" name="squadre-__INDEX__-nome" class="form-control form-control-lg" value="">
+                                        </div>
+
+                                        <div class="form-check mb-0">
+                                            <input type="checkbox" id="squadre-__INDEX__-is_ospite" name="squadre-__INDEX__-is_ospite" class="form-check-input">
+                                            <label class="form-check-label" for="squadre-__INDEX__-is_ospite">Ospite</label>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="add-squadra" class="btn btn-primary">Aggiungi squadra</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-check mt-2 mb-2">
+                    {{ form.is_privata(id="isPrivataBtn", class="form-check-input") }}
+                    {{ form.is_privata.label(class="form-check-label") }}
+                </div>
+
+                <!-- IMPOSTAZIONI PER GARE PRIVATE -->
+                <div id="private-users-fields" class="d-none">
+                    {% for element in [form.user_controllanti_string, form.user_spettatori_string] %}
+                        <div class="form-group mb-2">
+                            {{ element.label(class="form-control-label") }}
+
+                            {% if element.errors %}
+                                {{ element(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in element.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ element(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info", id="submit-request-form") }}
+            </div>
+        </form>
+    </div>
+
+    <!-- MODALE DI CONFERMA -->
+    <div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-labelledby="confirmSubmitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmSubmitModalLabel">Conferma</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Confermi la {{ 'richiesta di creazione' if current_user.ruolo == 0 else 'creazione' }} della gara?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" id="confirm-submit-btn" class="btn btn-primary">Conferma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="/static/js/richiedi_gara.js"></script>
+{% endblock %}

@@ -3,8 +3,8 @@
     "short_name": "J^4",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#777777",
-    "theme_color": "#777777",
+    "background_color": "#9effb8",
+    "theme_color": "#0f6520",
     "orientation": "portrait"
 }
 

@@ -2,15 +2,22 @@ from flask import render_template, redirect, url_for, flash, abort, send_from_di
 from flask_login import login_user, logout_user, current_user, login_required
 from j4v2 import app, db, bcrypt
 from j4v2.models import *
-from j4v2.forms import LoginForm, RegistrationForm
+from j4v2.forms import LoginForm, RegistrationForm, RequestForm
+from j4v2.utils import *
 
-ruoli_text_dict = {
-    -2: "Sei stato bannato da Jeiquarta. Se pensi che sia un errore, contatta un admin",
-    -1: "La richiesta di creazione del tuo account è in attesa di essere approvata da un admin",
-    0: "Ruolo: User",
-    1: "Ruolo: Admin",
-    2: "Ruolo: Developer"
-}
+
+@app.before_request
+def enforce_ban():
+    if current_user.is_authenticated and current_user.ruolo == -1: # questo non dovrebbe mai accadere in teoria
+        logout_user()
+        flash("Accesso all'accout negato: la richiesta di creazione del tuo account deve prima essere approvata da un admin", "danger")
+        return redirect(url_for("index"))
+
+    if current_user.is_authenticated and current_user.ruolo == -2:
+            logout_user()
+            flash("Accesso all'account negato: sei stato bannato da Jeiquarta. Se pensi che sia un errore, contatta un admin", "danger")
+            return redirect(url_for("index"))
+
 
 @app.route("/")
 def index():
@@ -23,6 +30,18 @@ def calendario():
 @app.route("/archivio_gare")
 def archivio_gare():
     return render_template("archivio_gare.html", title = "Archivio gare")
+
+@app.route("/richiedi_gara", methods = ["GET", "POST"])
+@login_required
+def richiedi_gara():
+    if current_user.ruolo < 0:
+        abort(403)
+        
+    form = RequestForm()
+    if form.validate_on_submit():
+        pass
+
+    return render_template("richiedi_gara.html", title = "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara", form = form)
 
 
 
@@ -85,4 +104,4 @@ def logout():
 @app.route("/area_riservata")
 @login_required
 def area_riservata():
-    return render_template("area_riservata.html", title = "Area riservata", ruolo_text = ruoli_text_dict[current_user.ruolo])
+    return render_template("area_riservata.html", title = "Area riservata", ruolo_text = ruoli_text_dict.get(current_user.ruolo, "Ruolo sconosciuto"))
