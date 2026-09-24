@@ -36,12 +36,26 @@ def archivio_gare():
 def richiedi_gara():
     if current_user.ruolo < 0:
         abort(403)
-        
-    form = RequestForm()
-    if form.validate_on_submit():
-        pass
 
-    return render_template("richiedi_gara.html", title = "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara", form = form)
+    form = RequestForm()
+    #if request.method == "POST":
+    #    print("DEBUG POST DATA:", request.form.to_dict())
+
+    if form.validate_on_submit():
+        #print("Form validato lato server")
+        mistake = request_find_mistake(form)
+        if mistake is not None:
+            print(mistake)
+            title = "Richiedi un allenamento" if form.is_allenamento.data and current_user.ruolo == 0 else "Fissa un allenamento" if form.is_allenamento.data else "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara"
+            return render_template("richiedi_gara.html", title = title, form = form, error_message = mistake)
+
+        pass
+    #else:
+    #    if request.method == "POST":
+    #        print("DEBUG FORM ERRORS:", form.errors)
+
+    title = "Richiedi un allenamento" if form.is_allenamento.data and current_user.ruolo == 0 else "Fissa un allenamento" if form.is_allenamento.data else "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara"
+    return render_template("richiedi_gara.html", title = title, form = form)
 
 
 

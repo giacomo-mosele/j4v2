@@ -57,10 +57,10 @@ class Gara(db.Model):
     richiedente_id = db.Column(db.Integer, db.ForeignKey("user.id", name = "fk_gara_richiedente"), nullable = True) # nullable per gli user cancellati
     
     is_allenamento = db.Column(db.Boolean, nullable = False, default = False)
-    is_pubblica = db.Column(db.Boolean, nullable = False)
+    is_pubblica = db.Column(db.Boolean, nullable = False, default = True)
     is_modificabile_da_richiedente = db.Column(db.Boolean, nullable = False, default = True)
 
-    durata = db.Column(db.Integer, nullable = False) # in secondi
+    durata = db.Column(db.Integer, nullable = False) # in minuti
     n = db.Column(db.Integer, nullable = False)
     fine_incremento = db.Column(db.Integer, nullable = False)
     tempo_jolly = db.Column(db.Integer, nullable = False)

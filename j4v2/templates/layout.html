@@ -23,7 +23,7 @@
         <title>Jeiquarta</title>
     {% endif %}
 </head>
-<body>
+<body data-user-role="{{ 'admin' if current_user.is_authenticated and current_user.ruolo > 0 else 'user' }}">
     <div class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel">
             <div class="container">

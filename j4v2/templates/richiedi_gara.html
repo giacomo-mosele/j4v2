@@ -6,12 +6,18 @@
 
 {% block content %}
     <div class="content-section">
-        <form method="post" action="">
+        <form id="request-form" method="post" action="" {% if error_message %}data-error-message="{{ error_message|e }}"{% endif %}>
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">{{ "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara" }}</legend>
+                <legend class="border-bottom mb-4" id="page-title-legend">{{ "Richiedi un allenamento" if form.is_allenamento.data and current_user.ruolo == 0 else "Fissa un allenamento" if form.is_allenamento.data else "Richiedi una gara" if current_user.ruolo == 0 else "Fissa una gara" }}</legend>
 
-                <!-- TITOLO DELLA GARA -->
+                <!-- CHECKBOX PER SELEZIONARE LA MODALITÀ DI ALLENAMENTO -->
+                <div class="form-check mt-2 mb-2">
+                    {{ form.is_allenamento(class="form-check-input", id="allenamentoCheck") }}
+                    {{ form.is_allenamento.label(class="form-check-label") }}
+                </div>
+
+                <!-- TITOLO DELLA GARA / DELL'ALLENAMENTO -->
                 <div class="form-group mb-4">
                     {{ form.titolo.label(class="form-control-label") }}
 
@@ -33,7 +39,7 @@
                     {{ form.start_manuale.label(class="form-check-label") }}
                 </div>
 
-                <!-- DATETIME, DURATA, N, FINE INCREMENTO, TEMPO JOLLY, BONUS RISPOSTE, BONUS FULLATO, MINUTI OSCURI, SQUADRE NASCOSTE A FINE GARA -->
+                <!-- DATETIME, DURATA, N, FINE INCREMENTO, TEMPO JOLLY, BONUS RISPOSTE, BONUS FULLATO, MINUTI OSCURI, SQUADRE NASCOSTE A FINE GARA / ALLENAMENTO -->
                 {% for element in [form.datetime_start, form.durata, form.n, form.fine_incremento, form.tempo_jolly, form.bonus_risposte_string, form.bonus_fullato_string, form.minuti_oscuri, form.top_n_squadre_nascoste] %}
                     <div class="form-group mb-2">
                         {{ element.label(class="form-control-label") }}
@@ -208,29 +214,43 @@
                     </div>
                 </div>
 
+                <!-- USER CONTROLLANTI -->
+                <div class="form-group mb-2">
+                    {{ form.user_controllanti_string.label(class="form-control-label") }}
+
+                    {% if form.user_controllanti_string.errors %}
+                        {{ form.user_controllanti_string(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.user_controllanti_string.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.user_controllanti_string(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
                 <div class="form-check mt-2 mb-2">
                     {{ form.is_privata(id="isPrivataBtn", class="form-check-input") }}
                     {{ form.is_privata.label(class="form-check-label") }}
                 </div>
 
-                <!-- IMPOSTAZIONI PER GARE PRIVATE -->
+                <!-- USER SPETTATORI PER GARE PRIVATE -->
                 <div id="private-users-fields" class="d-none">
-                    {% for element in [form.user_controllanti_string, form.user_spettatori_string] %}
-                        <div class="form-group mb-2">
-                            {{ element.label(class="form-control-label") }}
+                    <div class="form-group mb-2">
+                        {{ form.user_spettatori_string.label(class="form-control-label") }}
 
-                            {% if element.errors %}
-                                {{ element(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in element.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ element(class="form-control form-control-lg") }}
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+                        {% if form.user_spettatori_string.errors %}
+                            {{ form.user_spettatori_string(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.user_spettatori_string.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.user_spettatori_string(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
                 </div>
 
             </fieldset>
@@ -249,7 +269,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0">Confermi la {{ 'richiesta di creazione' if current_user.ruolo == 0 else 'creazione' }} della gara?</p>
+                    <p class="mb-0">Confermi la {{ 'richiesta di creazione' if current_user.ruolo == 0 else 'creazione' }} {{ 'dell\'allenamento' if form.is_allenamento.data else 'della gara' }}?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
