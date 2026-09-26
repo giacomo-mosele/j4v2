@@ -111,8 +111,6 @@ class Problema(db.Model):
 
     submissions = db.relationship("Submission", backref = "problema", lazy = True)
 
-    valore_attuale = db.Column(db.Integer, nullable = False)
-
     @property
     def numero_risoluzioni(self):
         return len([s for s in self.submissions if s.is_corretta])
