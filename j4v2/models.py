@@ -1,4 +1,8 @@
+from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
+
 from j4v2 import db, login_manager
+from j4v2.utils import int_to_month
 from flask_login import UserMixin
 import ast
 
@@ -72,6 +76,21 @@ class Gara(db.Model):
     problemi = db.relationship("Problema", backref = "gara", lazy = True)
     squadre = db.relationship("Squadra", backref = "gara", lazy = True)
     submissions = db.relationship("Submission", backref = "gara", lazy = True)
+
+    @property
+    def datetime_formattato(self):
+        if self.unix_start is None:
+            return None
+        dt = datetime.fromtimestamp(self.unix_start, tz = timezone.utc).astimezone(ZoneInfo("Europe/Rome"))
+        data_contratta = dt.strftime("%d/%m/%Y")
+        data_estesa = f"{dt.day} {int_to_month[dt.month]} {dt.year}"
+        orario = f"{dt.hour:02}:{dt.minute:02}" + (f":{dt.second:02}" if dt.second else "")
+        return {
+            "data_contratta": data_contratta,
+            "data_estesa": data_estesa,
+            "orario": orario,
+            "datetime_esteso": data_estesa + " alle " + orario
+        }
 
     @property
     def bonus_risposte(self):

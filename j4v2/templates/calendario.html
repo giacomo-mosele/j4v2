@@ -5,5 +5,17 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Calendario</h1>
+    <h1>Gare attive</h1>
+    <ul>
+        {% for gara in gare_in_corso %}
+            <li>{{ gara.titolo }} iniziata il {{ gara.datetime_formattato.datetime_esteso }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Gare prossime</h1>
+    <ul>
+        {% for gara in gare_prossime %}
+            <li>{{ gara.titolo }} con inizio il {{ gara.datetime_formattato.datetime_esteso }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

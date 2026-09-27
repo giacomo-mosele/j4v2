@@ -11,6 +11,21 @@ int_to_day = {
     6: "Domenica"
 }
 
+int_to_month = {
+    1: "Gennaio",
+    2: "Febbraio",
+    3: "Marzo",
+    4: "Aprile",
+    5: "Maggio",
+    6: "Giugno",
+    7: "Luglio",
+    8: "Agosto",
+    9: "Settembre",
+    10: "Ottobre",
+    11: "Novembre",
+    12: "Dicembre"
+}
+
 ruoli_text_dict = {
     0: "Ruolo: User",
     1: "Ruolo: Admin",
@@ -61,8 +76,13 @@ def _parse_csv_ints(value, field_name, allow_empty = True, min_value = 0, requir
     return parsed
 
 
-def italian_to_unix(italian_time: datetime) -> int: # passare come argomento un datetime con tzinfo = ZoneInfo("Europe/Rome")
-    utc_time = italian_time.astimezone(ZoneInfo("UTC"))
+def italian_to_unix(italian_time: datetime) -> int:
+    if italian_time is None:
+        return None
+    
+    dt = italian_time.replace(tzinfo = ZoneInfo("Europe/Rome")) # il datetime è SEMPRE considerato italiano
+
+    utc_time = dt.astimezone(ZoneInfo("UTC"))
     unix_time = int(utc_time.timestamp())
     return unix_time
 

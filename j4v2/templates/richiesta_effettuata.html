@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <style>
+        .content {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            place-items: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ h1_testo }}</h1>
+    <h2>{{ h2_testo }}</h2>
+    <a href="/">Torna alla home</a>
+{% endblock %}
