@@ -94,6 +94,7 @@ def unix_to_italian(unix_time) -> datetime:
     output_ita = output_utc.astimezone(ZoneInfo("Europe/Rome"))
     return output_ita
 
+from j4v2.models import User # qui per evitare circular import
 
 def request_find_mistake(form):
     if form is None:
@@ -209,7 +210,9 @@ def request_find_mistake(form):
         if not usernames:
             continue
         for username in usernames:
-            if " " in username or len(username) < 3 or len(username) > 16:
+            if len(username) < 3 or len(username) > 16:
                 return f"'{label}' contiene uno o più username invalidi."
+            if not User.query.filter_by(username = username).first():
+                return f"'{label}' contiene uno o più username non esistenti."
 
     return None

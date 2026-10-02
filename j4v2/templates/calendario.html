@@ -5,17 +5,98 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Gare attive</h1>
-    <ul>
-        {% for gara in gare_in_corso %}
-            <li>{{ gara.titolo }} iniziata il {{ gara.datetime_formattato.datetime_esteso }}</li>
-        {% endfor %}
-    </ul>
+    <h1 id="titleH1">Calendario</h1>
 
-    <h1>Gare prossime</h1>
-    <ul>
-        {% for gara in gare_prossime %}
-            <li>{{ gara.titolo }} con inizio il {{ gara.datetime_formattato.datetime_esteso }}</li>
-        {% endfor %}
-    </ul>
+    {% if gare_in_corso %}
+        <h1 id="gareAttive">Gare in corso</h1>
+        <ul class="gare-ul">
+            {% for gara in gare_in_corso %}
+                <li class="gara-li">
+                    <div class="{{ 'allenamento-card' if gara.is_allenamento else 'gara-card' }}">
+                        <div class="gara-card-left">
+                            <p>{{ gara.datetime_formattato.data_estesa }}</p>
+                            <p>Iniziata alle {{ gara.datetime_formattato.orario }}</p>
+                            <p>Durata: {{ gara.durata }} minuti</p>
+                        </div>
+                        <div class="gara-card-center">
+                            <h3>{{ gara.titolo }}</h3>
+                            {% if gara.is_allenamento %}
+                                <h5>{{ '(Allenamento)' if gara.is_pubblica else '(Allenamento privato)' }}</h5>
+                            {% elif not gara.is_pubblica %}
+                                <h5>(Gara privata)</h5>
+                            {% endif %}
+                        </div>
+                        <div class="gara-card-right">
+                            <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
+                            <p>{{ gara.problemi | length }} problemi</p>
+                            <a class="gara-link" href="/visualizza_gara?id={{ gara.id }}">{{ 'Vedi allenamento' if gara.is_allenamento else 'Vedi gara' }}</a>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if gare_prossime %}
+        <h1 id="prossimeGare">Prossime gare</h1>
+        <ul class="gare-ul">
+            {% for gara in gare_prossime %}
+                <li class="gara-li">
+                    <div class="{{ 'allenamento-card' if gara.is_allenamento else 'gara-card' }}">
+                        <div class="gara-card-left">
+                            <p>{{ gara.datetime_formattato.data_estesa }}</p>
+                            <p>Inizio alle {{ gara.datetime_formattato.orario }}</p>
+                            <p>Durata: {{ gara.durata }} minuti</p>
+                        </div>
+                        <div class="gara-card-center">
+                            <h3>{{ gara.titolo }}</h3>
+                            {% if gara.is_allenamento %}
+                                <h5>{{ '(Allenamento)' if gara.is_pubblica else '(Allenamento privato)' }}</h5>
+                            {% elif not gara.is_pubblica %}
+                                <h5>(Gara privata)</h5>
+                            {% endif %}
+                        </div>
+                        <div class="gara-card-right">
+                            <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
+                            <p>{{ gara.problemi | length }} problemi</p>
+                            <a class="gara-link" href="/visualizza_gara?id={{ gara.id }}">{{ 'Vedi allenamento' if gara.is_allenamento else 'Vedi gara' }}</a>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if gare_future %}
+        <h1 id="gareFuture">Gare future</h1>
+        <ul class="gare-ul">
+            {% for gara in gare_future %}
+                <li class="gara-li">
+                    <div class="{{ 'allenamento-card' if gara.is_allenamento else 'gara-card' }}">
+                        <div class="gara-card-left">
+                            {% if gara.unix_start %}
+                                <p>{{ gara.datetime_formattato.data_estesa }}</p>
+                                <p>Inizio alle {{ gara.datetime_formattato.orario }}</p>
+                            {% else %}
+                                <p>Inizio non ancora fissato</p>
+                            {% endif %}
+                            <p>Durata: {{ gara.durata }} minuti</p>
+                        </div>
+                        <div class="gara-card-center">
+                            <h3>{{ gara.titolo }}</h3>
+                            {% if gara.is_allenamento %}
+                                <h5>{{ '(Allenamento)' if gara.is_pubblica else '(Allenamento privato)' }}</h5>
+                            {% elif not gara.is_pubblica %}
+                                <h5>(Gara privata)</h5>
+                            {% endif %}
+                        </div>
+                        <div class="gara-card-right">
+                            <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
+                            <p>{{ gara.problemi | length }} problemi</p>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}

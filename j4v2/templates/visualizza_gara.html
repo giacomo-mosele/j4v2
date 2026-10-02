@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>{{ gara.titolo }}</h1>
+
+    <p>Inizio: {{ gara.datetime_formattato.datetime_esteso }}</p>
+    <p>Durata: {{ gara.durata }} minuti</p>
+
+    <h3>{{ 'Partecipanti:' if gara.is_allenamento else 'Squadre iscritte:' }}</h3>
+    {% for squadra in gara.squadre %}
+        <p>{{ squadra.nome + (" (ospite)" if squadra.is_ospite else "") }}</p>
+    {% endfor %}
+    
+    <h3>Problemi:</h3>
+    {% for problema in gara.problemi %}
+        <p>{{ problema.titolo }}</p>
+    {% endfor %}
+{% endblock %}

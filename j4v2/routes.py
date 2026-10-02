@@ -6,6 +6,7 @@ from j4v2 import app, db, bcrypt
 from j4v2.models import *
 from j4v2.forms import LoginForm, RegistrationForm, RequestForm
 from j4v2.utils import *
+from sqlalchemy import or_
 
 import random
 import string
@@ -27,9 +28,21 @@ def enforce_ban():
         return redirect(url_for("index"))
 
     if current_user.is_authenticated and current_user.ruolo == -2:
-            logout_user()
-            flash("Accesso all'account negato: sei stato bannato da Jeiquarta. Se pensi che sia un errore, contatta un admin", "danger")
-            return redirect(url_for("index"))
+        logout_user()
+        flash("Accesso all'account negato: sei stato bannato da Jeiquarta. Se pensi che sia un errore, contatta un admin", "danger")
+        return redirect(url_for("index"))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("error.html", title = "Pagina non trovata", error = 404, descrizione = "La pagina che stai cercando non esiste."), 404
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template("error.html", title = "Non autorizzato", error = 401, descrizione = "Devi effettuare il login per accedere a questa pagina."), 401
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("error.html", title = "Accesso negato", error = 403, descrizione = "Non hai i permessi necessari per accedere a questa pagina."), 403
 
 
 @app.route("/")
@@ -38,13 +51,87 @@ def index():
 
 @app.route("/calendario")
 def calendario():
-    gare_in_corso = Gara.query.filter(Gara.stato == 2).all()
-    gare_prossime = Gara.query.filter(Gara.stato == 1).all()
-    return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime)
+    now_unix = int(datetime.now(timezone.utc).timestamp())
+
+    gare_in_corso = Gara.query.filter(
+        Gara.stato == 2,
+        Gara.unix_start != None, # teoricamente ridondante
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    gare_in_corso.sort(key = lambda g: g.unix_start)
+
+    gare_prossime = Gara.query.filter(
+        Gara.stato == 1,
+        Gara.unix_start != None,
+        Gara.unix_start - now_unix <= 86400,
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    gare_prossime.sort(key = lambda g: g.unix_start)
+    
+    gare_da_startare = Gara.query.filter(
+        Gara.stato == 1,
+        Gara.unix_start == None,
+        Gara.start_manuale == True,
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    
+    gare_lontane = Gara.query.filter(
+        Gara.stato == 1,
+        Gara.unix_start != None,
+        Gara.unix_start - now_unix > 86400,
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    gare_lontane.sort(key = lambda g: g.unix_start)
+
+    return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime, gare_future = gare_da_startare + gare_lontane)
+
+@app.route("/visualizza_gara")
+def visualizza_gara():
+    id = request.args.get("id")
+    gara = Gara.query.get(id)
+    if not gara:
+        abort(404)
+    if not gara.is_pubblica:
+        if not current_user.is_authenticated:
+            abort(401)
+        if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
+            abort(403)
+    
+    return render_template("visualizza_gara.html", title = gara.titolo, gara = gara)
 
 @app.route("/archivio_gare")
 def archivio_gare():
-    return render_template("archivio_gare.html", title = "Archivio gare")
+    gare_terminate = Gara.query.filter(
+        Gara.stato == 3,
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    gare_terminate.sort(key = lambda g: g.unix_start, reverse = True)
+    return render_template("archivio_gare.html", title = "Archivio gare", gare_terminate = gare_terminate)
 
 @app.route("/richiedi_gara", methods = ["GET", "POST"])
 @login_required
@@ -100,6 +187,26 @@ def richiedi_gara():
                     bonus_full = 0
                 )
                 db.session.add(new_squadra)
+
+            usernames_controllanti = [username.strip() for username in str(form.user_controllanti_string.data or "").split(",") if username.strip() != ""]
+            if usernames_controllanti:
+                for username in usernames_controllanti:
+                    user = User.query.filter(User.username == username).first()
+                    new_gara.user_controllanti.append(user)
+                    new_gara.user_spettatori.append(user)
+            if current_user.username not in usernames_controllanti:
+                new_gara.user_controllanti.append(current_user)
+                new_gara.user_spettatori.append(current_user)
+
+            if form.is_privata.data:
+                usernames_spettatori = [username.strip() for username in str(form.user_spettatori_string.data or "").split(",") if username.strip() != ""]
+                if usernames_spettatori:
+                    for username in usernames_spettatori:
+                        if username in usernames_controllanti or username == current_user.username: # già gestito
+                            continue
+                        user = User.query.filter(User.username == username).first()
+                        new_gara.user_spettatori.append(user)
+
 
             db.session.add(new_gara)
             db.session.commit()

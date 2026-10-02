@@ -5,7 +5,110 @@
     place-items: center;
 }
 
+#titleH1 {
+    margin-top: 10px;
+    margin-bottom: 40px;
+    color: var(--j4-text-black);
+    font-size: 60px;
+}
+
 h1 {
     margin-top: 10px;
     color: var(--j4-text-black);
+    font-size: 40px;
+}
+
+#prossimeGare,
+#gareFuture {
+    margin-top: 50px;
+}
+
+.gare-ul {
+    list-style-type: none;
+    margin: 10px;
+    padding: 0;
+}
+
+.gara-li {
+    margin-bottom: 10px;
+}
+
+.gara-card,
+.allenamento-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-radius: 15px;
+    gap: 12px 20px;
+    width: min(1000px, 85vw);
+    margin: 0 auto;
+    padding: 12px 18px;
+    box-sizing: border-box;
+}
+
+.gara-card {
+    border: 3px solid var(--j4-dark-green);
+}
+
+.allenamento-card {
+    border: 3px solid var(--j4-blue);
+    background-color: rgba(36, 64, 150, 0.1);
+}
+
+.gara-card-left,
+.gara-card-right {
+    flex: 1 1 220px;
+    min-width: 0;
+    align-self: flex-start;
+}
+
+.gara-card-left {
+    text-align: left;
+}
+
+.gara-card-center {
+    flex: 0 0 100%;
+    text-align: center;
+    order: -1;
+    margin-bottom: 4px;
+}
+
+.gara-card-right {
+    text-align: right;
+}
+
+.gara-card-left p,
+.gara-card-right p,
+.gara-card-center h3 {
+    margin: 4px 0;
+}
+
+.gara-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--j4-dark-green);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.gara-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .gara-card {
+        justify-content: space-between;
+        gap: 8px 0;
+    }
+
+    .gara-card-left,
+    .gara-card-right {
+        flex-basis: 48%;
+        min-width: 0;
+    }
+
+    .gara-card-right {
+        text-align: right;
+    }
 }

@@ -2,7 +2,6 @@ from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 
 from j4v2 import db, login_manager
-from j4v2.utils import int_to_month
 from flask_login import UserMixin
 import ast
 
@@ -50,6 +49,8 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User({self.username})"
+
+from j4v2.utils import int_to_month # qui per evitare circular import
 
 class Gara(db.Model):
     id = db.Column(db.Integer, primary_key = True)
