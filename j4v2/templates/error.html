@@ -1,7 +1,12 @@
 {% extends "layout.html" %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/error.css">
+{% endblock %}
+
 {% block content %}
     <h1>Errore {{ error }}</h1>
     <p>{{ descrizione }}</p>
     <a href="{{ url_for('index') }}">Torna alla home</a>
+    <img class="meme-img" src="/static/images/meme/{{ meme_filename }}">
 {% endblock %}

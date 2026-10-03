@@ -34,15 +34,15 @@ def enforce_ban():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("error.html", title = "Pagina non trovata", error = 404, descrizione = "La pagina che stai cercando non esiste."), 404
+    return render_template("error.html", title = "Pagina non trovata", error = 404, descrizione = "La pagina che stai cercando non esiste.", meme_filename = get_meme_filename()), 404
 
 @app.errorhandler(401)
 def unauthorized(e):
-    return render_template("error.html", title = "Non autorizzato", error = 401, descrizione = "Devi effettuare il login per accedere a questa pagina."), 401
+    return render_template("error.html", title = "Non autorizzato", error = 401, descrizione = "Devi effettuare il login per accedere a questa pagina.", meme_filename = get_meme_filename()), 401
 
 @app.errorhandler(403)
 def forbidden(e):
-    return render_template("error.html", title = "Accesso negato", error = 403, descrizione = "Non hai i permessi necessari per accedere a questa pagina."), 403
+    return render_template("error.html", title = "Accesso negato", error = 403, descrizione = "Non hai i permessi necessari per accedere a questa pagina.", meme_filename = get_meme_filename()), 403
 
 
 @app.route("/")

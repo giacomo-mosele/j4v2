@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+import os
+import random
 
 int_to_day = {
     0: "Lunedì",
@@ -214,5 +216,14 @@ def request_find_mistake(form):
                 return f"'{label}' contiene uno o più username invalidi."
             if not User.query.filter_by(username = username).first():
                 return f"'{label}' contiene uno o più username non esistenti."
+
+    return None
+
+def get_meme_filename():
+    directory_meme = os.path.join(os.path.dirname(__file__), "static", "images", "meme")
+    filenames = [f for f in os.listdir(directory_meme) if os.path.isfile(os.path.join(directory_meme, f))]
+
+    if filenames:
+        return random.choice(filenames)
 
     return None
