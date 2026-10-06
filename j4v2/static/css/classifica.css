@@ -1,0 +1,47 @@
+.content {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    place-items: center;
+}
+
+#titoloGara {
+    margin-top: 10px;
+    margin-bottom: 40px;
+    color: var(--j4-text-black);
+    font-size: 50px;
+}
+
+.classifica-table {
+    background-color: white;
+}
+/*
+.table__row:nth-child(odd) {
+    background-color: #f6f6f6;
+}
+*/
+.table__header {
+    text-align: center;
+    font-size: 20px;
+}
+
+.table__cell {
+    padding: 6px;
+    text-align: center;
+    width: 200pt;
+    border: 1px solid black;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.casellina-1 {
+    background-color: lightcoral;
+}
+
+.casellina1 {
+    background-color: lightgreen;
+}
+
+.jolly {
+    box-shadow: 0px 0px 0px 3px yellow inset;
+}

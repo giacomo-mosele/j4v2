@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
 
-from flask import render_template, redirect, url_for, flash, abort, send_from_directory, request, jsonify
+from flask import render_template, redirect, url_for, flash, abort, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from j4v2 import app, db, bcrypt
 from j4v2.models import *
 from j4v2.forms import LoginForm, RegistrationForm, RequestForm
 from j4v2.utils import *
+from j4v2.classifica_builder import *
 from sqlalchemy import or_
 
 import random
@@ -103,7 +104,7 @@ def calendario():
     ).all()
     gare_lontane.sort(key = lambda g: g.unix_start)
 
-    return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime, gare_future = gare_da_startare + gare_lontane)
+    return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime, gare_future = gare_lontane + gare_da_startare)
 
 @app.route("/visualizza_gara")
 def visualizza_gara():
@@ -117,7 +118,44 @@ def visualizza_gara():
         if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
             abort(403)
     
-    return render_template("visualizza_gara.html", title = gara.titolo, gara = gara)
+    return render_template("visualizza_gara.html", title = f"Preview: {gara.titolo}", gara = gara)
+
+
+@app.route("/classifica")
+def classifica():
+    id = request.args.get("id")
+    gara = Gara.query.get(id)
+    if not gara:
+        abort(404)
+    if not gara.is_pubblica:
+        if not current_user.is_authenticated:
+            abort(401)
+        if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
+            abort(403)
+
+    return render_template("classifica.html", title = gara.titolo, gara = gara.basic_dict())
+
+@app.route("/get_classifica_table")
+def get_classifica_table():
+    id = request.args.get("id")
+    gara = Gara.query.get(id)
+    if not gara:
+        abort(404)
+    if not gara.is_pubblica:
+        if not current_user.is_authenticated:
+            abort(401)
+        if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
+            abort(403)
+
+    update_from_submissions(gara)
+    
+    valori_aggiornati = get_valori_aggiornati(gara)
+    righe_aggiornate = get_righe_aggiornate(gara)
+
+    return jsonify({
+        "valori": valori_aggiornati,
+        "righe": righe_aggiornate
+    })
 
 @app.route("/archivio_gare")
 def archivio_gare():

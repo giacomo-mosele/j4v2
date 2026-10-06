@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/visualizza_gara.css">
+{% endblock extra_css %}
+
 {% block content %}
     <h1>{{ gara.titolo }}</h1>
 
@@ -15,4 +19,6 @@
     {% for problema in gara.problemi %}
         <p>{{ problema.titolo }}</p>
     {% endfor %}
+
+    <a class="gara-link" href="/classifica?id={{ gara.id }}">{{ 'Vedi tabellone' if gara.is_allenamento else 'Vedi classifica' }}</a>
 {% endblock %}

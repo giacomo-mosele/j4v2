@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/classifica.css">
+{% endblock %}
+
+{% block content %}
+    <h1 id="titoloGara">{{ gara.titolo }}</h1>
+    
+    <table id="classificaTable" class="classifica-table">
+        <tr class="table__header">
+            <th class="table__cell">Pos.</th>
+            <th class="table__cell">Squadra</th>
+            <th class="table__cell">Punteggio</th>
+            {% for i in range(gara.numero_problemi) %}
+                <th class="table__cell">P{{i+1}}</th>
+            {% endfor %}
+        </tr>
+        
+        <tr id="valoriRow" class="table__row">
+            <td class="table__cell"></td>
+            <td class="table__cell"></td>
+            <td class="table__cell"></td>
+            {% for i in range(gara.numero_problemi) %}
+                <td class="table__cell">VAL</td>
+            {% endfor %}
+        </tr>
+
+        {% for idx_squadra in range(gara.numero_squadre) %}
+            <tr id="squadraRow_{{ idx_squadra }}" class="table__row">
+                <td class="table__cell">#</td>
+                <td class="table__cell">NOME</td>
+                <td class="table__cell">SCORE</td>
+                {% for idx_problema in range(gara.numero_problemi) %}
+                    <td class="table__cell">/</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        const id_gara = parseInt("{{ gara.id }}")
+        const numero_problemi = parseInt("{{ gara.numero_problemi }}");
+        const numero_squadre = parseInt("{{ gara.numero_squadre }}");
+    </script>
+
+    <script src="/static/js/classifica.js"></script>
+{% endblock %}

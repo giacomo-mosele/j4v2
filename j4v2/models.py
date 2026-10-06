@@ -50,7 +50,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"User({self.username})"
 
-from j4v2.utils import int_to_month # qui per evitare circular import
+from j4v2.utils import int_to_day, int_to_month # qui per evitare circular import
 
 class Gara(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -84,7 +84,7 @@ class Gara(db.Model):
             return None
         dt = datetime.fromtimestamp(self.unix_start, tz = timezone.utc).astimezone(ZoneInfo("Europe/Rome"))
         data_contratta = dt.strftime("%d/%m/%Y")
-        data_estesa = f"{dt.day} {int_to_month[dt.month]} {dt.year}"
+        data_estesa = f"{int_to_day[dt.weekday()]} {dt.day} {int_to_month[dt.month]} {dt.year}"
         orario = f"{dt.hour:02}:{dt.minute:02}" + (f":{dt.second:02}" if dt.second else "")
         return {
             "data_contratta": data_contratta,
@@ -122,6 +122,14 @@ class Gara(db.Model):
 
     def __repr__(self):
         return f"Gara({self.titolo})"
+
+    def basic_dict(self): # viene mandato con /classifica
+        return {
+            "id": self.id,
+            "titolo": self.titolo,
+            "numero_problemi": self.numero_problemi,
+            "numero_squadre": self.numero_squadre
+        }
 
 class Problema(db.Model):
     id = db.Column(db.Integer, primary_key = True)

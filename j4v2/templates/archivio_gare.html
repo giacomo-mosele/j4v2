@@ -28,7 +28,7 @@
                         <div class="gara-card-right">
                             <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
                             <p>{{ gara.problemi | length }} problemi</p>
-                            <a class="gara-link" href="/visualizza_gara?id={{ gara.id }}">{{ 'Vedi allenamento' if gara.is_allenamento else 'Vedi gara' }}</a>
+                            <a class="gara-link" href="/classifica?id={{ gara.id }}">{{ 'Vedi tabellone finale' if gara.is_allenamento else 'Vedi classifica finale' }}</a>
                         </div>
                     </div>
                 </li>
