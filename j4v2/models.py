@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
     ruolo = db.Column(db.Integer, nullable = True) # 0 = user, 1 = admin, 2 = developer; -1 = da approvare, -2 = bannato
     hashed_password = db.Column(db.String(32), nullable = False)
 
-    gare_richieste = db.relationship("Gara", backref = "richiedente", lazy = True)
+    gare_richieste = db.relationship("Gara", backref = "richiedente", lazy = True, order_by = "Gara.id")
 
     gare_controllate = db.relationship(
         "Gara",
@@ -74,9 +74,9 @@ class Gara(db.Model):
     minuti_oscuri = db.Column(db.Integer, nullable = False)
     top_n_squadre_nascoste = db.Column(db.Integer, nullable = False)
 
-    problemi = db.relationship("Problema", backref = "gara", lazy = True)
-    squadre = db.relationship("Squadra", backref = "gara", lazy = True)
-    submissions = db.relationship("Submission", backref = "gara", lazy = True)
+    problemi = db.relationship("Problema", backref = "gara", lazy = True, order_by = "Problema.id")
+    squadre = db.relationship("Squadra", backref = "gara", lazy = True, order_by = "Squadra.id")
+    submissions = db.relationship("Submission", backref = "gara", lazy = True, order_by = "Submission.unix_time")
 
     @property
     def datetime_formattato(self):
@@ -137,7 +137,7 @@ class Problema(db.Model):
     risultato = db.Column(db.Integer, nullable = False)
     gara_id = db.Column(db.Integer, db.ForeignKey("gara.id", name = "fk_problema_gara"), nullable = False)
 
-    submissions = db.relationship("Submission", backref = "problema", lazy = True)
+    submissions = db.relationship("Submission", backref = "problema", lazy = True, order_by = "Submission.unix_time")
 
     @property
     def numero_risoluzioni(self):
@@ -157,7 +157,7 @@ class Squadra(db.Model):
     identificativo_squadra = db.Column(db.String(6), nullable = True) # ABCXYZ
     codice_accesso_squadra = db.Column(db.String(6), nullable = True) # 123456
 
-    submissions = db.relationship("Submission", backref = "squadra", lazy = True)
+    submissions = db.relationship("Submission", backref = "squadra", lazy = True, order_by = "Submission.unix_time")
     jolly_id = db.Column(db.Integer, db.ForeignKey("problema.id", name = "fk_squadra_jolly"), nullable = True)
 
     bonus_punti = db.Column(db.Integer, nullable = False, default = 0)

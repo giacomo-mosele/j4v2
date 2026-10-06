@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/inserimento.css">
+{% endblock %}
+
+{% block content %}
+    <div class="inserimento-header">
+        <h1 id="titleH1">Inserimento</h1>
+        <h2>{{ gara.titolo }}</h2>
+    </div>
+
+    <div class="table-responsive inserimento-table-wrapper">
+        <table class="inserimento-table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    {% for problema in problemi %}
+                        <th scope="col">{{ problema.titolo }} P{{ loop.index }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% set ns = namespace(team_index = 0) %}
+                {% for squadra in squadre %}
+                    {% set ns.team_index = ns.team_index + 1 %}
+                    <tr>
+                        <th scope="row">{{ squadra.nome }}</th>
+                        {% for loop_problema in range(problemi|length) %}
+                            <td>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary inserimento-cell"
+                                    data-cell-id="S{{ '%02d'|format(ns.team_index) }}P{{ '%02d'|format(loop_problema + 1) }}"
+                                    data-squadra-id="{{ squadra.id }}"
+                                    data-squadra-nome="{{ squadra.nome }}"
+                                    data-problema-numero="{{ loop_problema + 1 }}"
+                                    aria-haspopup="dialog"
+                                    aria-controls="submission-modal"
+                                >
+                                    S{{ '%02d'|format(ns.team_index) }}P{{ '%02d'|format(loop_problema + 1) }}
+                                </button>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="{{ gara.numero_problemi + 1 }}" class="text-center">Non ci sono squadre per questa gara.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="submission-modal" tabindex="-1" aria-labelledby="submission-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="submission-form" method="post" action="{{ url_for('inserimento_submission') }}">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="submission-modal-title">Inserisci risultato</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="squadra-id" name="squadra_id">
+                        <input type="hidden" id="gara-id" name="gara_id" value="{{ gara.id }}">
+                        <input id="problema-numero" name="problema_numero" type="hidden">
+
+                        <div class="mb-3 rounded p-3 bg-light text-center" aria-live="polite">
+                            <div id="selected-squadra" class="fw-semibold"></div>
+                            <div id="selected-problema" class="small"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="resultato" class="form-label">Risultato</label>
+                            <input id="resultato" name="risultato" type="number" class="form-control" min="0" max="9999" step="1" required>
+                        </div>
+
+                        <label class="form-check d-flex align-items-center cursor-pointer" for="is-jolly">
+                            <input id="is-jolly" name="is_jolly" type="checkbox" class="form-check-input me-2" role="switch">
+                            <span>Imposta come jolly</span>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Inserisci risultato</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        const id_gara = parseInt("{{ gara.id }}");
+        const numero_problemi = parseInt("{{ gara.numero_problemi }}");
+        const numero_squadre = parseInt("{{ gara.numero_squadre }}");
+    </script>
+
+    <script src="/static/js/inserimento.js"></script>
+{% endblock %}

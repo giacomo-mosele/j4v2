@@ -13,7 +13,7 @@ import random
 import string
 
 @app.before_request
-def aggiorna_database():
+def aggiorna_database_preprocessor():
     now_unix = int(datetime.now(timezone.utc).timestamp())
     gare_da_attualizzare = Gara.query.filter(Gara.unix_start != None, Gara.unix_start <= now_unix, Gara.stato == 1).all()
     if gare_da_attualizzare:
@@ -33,17 +33,18 @@ def enforce_ban():
         flash("Accesso all'account negato: sei stato bannato da Jeiquarta. Se pensi che sia un errore, contatta un admin", "danger")
         return redirect(url_for("index"))
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("error.html", title = "Pagina non trovata", error = 404, descrizione = "La pagina che stai cercando non esiste.", meme_filename = get_meme_filename()), 404
-
+@app.errorhandler(400)
+def bad_request(e):
+    return render_template("error.html", title = "Richiesta non valida", error = 400, descrizione = "La richiesta inviata al server non è valida.", meme_filename = get_meme_filename()), 400
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template("error.html", title = "Non autorizzato", error = 401, descrizione = "Devi effettuare il login per accedere a questa pagina.", meme_filename = get_meme_filename()), 401
-
 @app.errorhandler(403)
 def forbidden(e):
     return render_template("error.html", title = "Accesso negato", error = 403, descrizione = "Non hai i permessi necessari per accedere a questa pagina.", meme_filename = get_meme_filename()), 403
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("error.html", title = "Pagina non trovata", error = 404, descrizione = "La pagina che stai cercando non esiste.", meme_filename = get_meme_filename()), 404
 
 
 @app.route("/")
@@ -106,6 +107,20 @@ def calendario():
 
     return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime, gare_future = gare_lontane + gare_da_startare)
 
+@app.route("/archivio_gare")
+def archivio_gare():
+    gare_terminate = Gara.query.filter(
+        Gara.stato == 3,
+        or_(
+            Gara.is_pubblica == True,
+            current_user.is_authenticated and current_user.ruolo >= 1,
+            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
+            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
+        )
+    ).all()
+    gare_terminate.sort(key = lambda g: g.unix_start, reverse = True)
+    return render_template("archivio_gare.html", title = "Archivio gare", gare_terminate = gare_terminate)
+
 @app.route("/visualizza_gara")
 def visualizza_gara():
     id = request.args.get("id")
@@ -157,19 +172,88 @@ def get_classifica_table():
         "righe": righe_aggiornate
     })
 
-@app.route("/archivio_gare")
-def archivio_gare():
-    gare_terminate = Gara.query.filter(
-        Gara.stato == 3,
-        or_(
-            Gara.is_pubblica == True,
-            current_user.is_authenticated and current_user.ruolo >= 1,
-            current_user.is_authenticated and current_user == Gara.richiedente, # teoricamente ridondante
-            current_user.is_authenticated and Gara.user_spettatori.any(User.id == current_user.id)
-        )
-    ).all()
-    gare_terminate.sort(key = lambda g: g.unix_start, reverse = True)
-    return render_template("archivio_gare.html", title = "Archivio gare", gare_terminate = gare_terminate)
+
+@app.route("/inserimento")
+def inserimento():
+    id = request.args.get("id")
+    gara = Gara.query.get(id)
+    if not gara:
+        abort(404)
+    if not current_user.is_authenticated:
+        abort(401)
+    if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
+        abort(403)
+
+    return render_template("inserimento.html", title = "Inserimento", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
+
+
+@app.route("/inserimento/submission", methods = ["POST"])
+def inserimento_submission():
+    id_gara = request.form.get("gara_id")
+    id_squadra = request.form.get("squadra_id")
+    numero_problema = request.form.get("problema_numero")
+    is_jolly = request.form.get("is_jolly") == "on"
+
+    try:
+        id_gara = int(id_gara)
+        id_squadra = int(id_squadra)
+        numero_problema = int(numero_problema)
+    except (TypeError, ValueError):
+        abort(400)
+
+    gara = Gara.query.get(id_gara)
+    squadra = Squadra.query.get(id_squadra)
+    if not gara or not squadra or squadra.gara_id != id_gara:
+        abort(400)
+    if not current_user.is_authenticated:
+        abort(401)
+    if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
+        abort(403)
+    if numero_problema < 1 or numero_problema > gara.numero_problemi:
+        abort(400)
+
+    problema = gara.problemi[numero_problema - 1]
+    risultato = request.form.get("risultato")
+    if is_jolly:
+        risultato = 0
+    else:
+        try:
+            risultato = int(risultato)
+        except (TypeError, ValueError):
+            abort(400)
+        if risultato < 0 or risultato > 9999:
+            abort(400)
+
+    submissions_precedenti_giuste = Submission.query.filter_by(gara_id = id_gara, squadra_id = id_squadra, problema_id = problema.id, is_corretta = True).all()
+    stato_jolly = 0
+    if is_jolly:
+        if squadra.jolly_id is not None:
+            flash("Errore: la squadra ha già piazzato un jolly in precedenza", "danger")
+            return redirect(url_for("inserimento", id = id_gara))
+        if submissions_precedenti_giuste:
+            stato_jolly = -1 # il jolly è piazzato dopo una submission corretta
+        else:
+            stato_jolly = 1
+            squadra.jolly_id = problema.id
+
+    new_submission = Submission(
+        gara_id = id_gara,
+        squadra_id = id_squadra,
+        problema_id = problema.id,
+        unix_time = int(datetime.now(timezone.utc).timestamp()),
+        risultato = risultato,
+        is_corretta = (risultato == problema.risultato),
+        bonus_associato = 0, # viene calcolato in update_from_submissions()
+        stato_jolly = stato_jolly,
+        is_scelta_jolly = is_jolly,
+        is_enabled = True,
+    )
+    db.session.add(new_submission)
+    
+    db.session.commit()
+
+    return redirect(url_for("inserimento", id = id_gara))
+
 
 @app.route("/richiedi_gara", methods = ["GET", "POST"])
 @login_required
@@ -271,6 +355,7 @@ def richiesta_effettuata():
         return redirect(url_for("index"))
 
     return render_template("richiesta_effettuata.html", title = "Richiesta effettuata", h1_testo = h1_testo, h2_testo = h2_testo)
+
 
 
 @app.route("/register", methods = ["GET", "POST"])
