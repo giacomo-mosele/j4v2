@@ -1,14 +1,19 @@
 const valoriRow = document.getElementById("valoriRow");
+const tempoLabel = document.getElementById("tempoLabel");
 
 function aggiorna_classifica(payload) {
     const valori = payload.valori;
     const righe = payload.righe;
+    const tempo = payload.tempo;
     const righeSquadra = Array.from({ length: numero_squadre }, (_, indice) =>
         document.getElementById(`squadraRow_${indice}`)
     );
     const posizioniIniziali = new Map(
         righeSquadra.map((riga) => [riga, riga.getBoundingClientRect().top])
     );
+
+    // AGGIORNA TEMPO
+    tempoLabel.innerHTML = tempo;
 
     // AGGIORNA VALORI
     valoriRow.innerHTML = "";

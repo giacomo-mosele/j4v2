@@ -139,6 +139,8 @@ class Problema(db.Model):
 
     submissions = db.relationship("Submission", backref = "problema", lazy = True, order_by = "Submission.unix_time")
 
+    VALORE = db.Column(db.Integer, nullable = True, default = 20)
+
     @property
     def numero_risoluzioni(self):
         return len([s for s in self.submissions if s.is_corretta])

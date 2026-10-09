@@ -167,9 +167,25 @@ def get_classifica_table():
     valori_aggiornati = get_valori_aggiornati(gara)
     righe_aggiornate = get_righe_aggiornate(gara)
 
+    tempo_label = "Non è stato ancora fissato l'inizio di questa gara"
+    if ( not gara.start_manuale and gara.unix_start ):
+        secondi_passati = int(datetime.now(timezone.utc).timestamp()) - gara.unix_start
+        if secondi_passati < 0:
+            tempo_label = f"La gara inizierà alle {gara.datetime_formattato['orario']}"
+            if secondi_passati < - 3600*24:
+                tempo_label += f" del {gara.datetime_formattato['data_contratta']}"
+        elif secondi_passati > gara.durata * 60:
+            tempo_label = "Gara terminata"
+        else:
+            total = (gara.durata * 60) - secondi_passati
+            hours, remainder = divmod(total, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            tempo_label = f"{hours} h {minutes:02} min {seconds:02} sec"
+
     return jsonify({
         "valori": valori_aggiornati,
-        "righe": righe_aggiornate
+        "righe": righe_aggiornate,
+        "tempo": tempo_label
     })
 
 
@@ -224,7 +240,13 @@ def inserimento_submission():
         if risultato < 0 or risultato > 9999:
             abort(400)
 
-    submissions_precedenti_giuste = Submission.query.filter_by(gara_id = id_gara, squadra_id = id_squadra, problema_id = problema.id, is_corretta = True).all()
+    submissions_precedenti_giuste = Submission.query.filter_by(
+        is_enabled = True,
+        gara_id = id_gara,
+        squadra_id = id_squadra,
+        problema_id = problema.id,
+        is_corretta = True
+    ).all()
     stato_jolly = 0
     if is_jolly:
         if squadra.jolly_id is not None:
