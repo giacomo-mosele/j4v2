@@ -30,7 +30,7 @@ h1 {
 }
 
 .gara-li {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .gara-card,
@@ -39,12 +39,13 @@ h1 {
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
-    border-radius: 15px;
-    gap: 12px 20px;
-    width: min(1000px, 85vw);
+    border-radius: 0;
+    gap: 4px 16px;
+    width: min(700px, 85vw);
     margin: 0 auto;
-    padding: 12px 18px;
+    padding: 6px 14px;
     box-sizing: border-box;
+    font-size: 0.9rem;
 }
 
 .gara-card {
@@ -58,7 +59,7 @@ h1 {
 
 .gara-card-left,
 .gara-card-right {
-    flex: 1 1 220px;
+    flex: 1 1 180px;
     min-width: 0;
     align-self: flex-start;
 }
@@ -71,7 +72,6 @@ h1 {
     flex: 0 0 100%;
     text-align: center;
     order: -1;
-    margin-bottom: 4px;
 }
 
 .gara-card-right {
@@ -80,13 +80,26 @@ h1 {
 
 .gara-card-left p,
 .gara-card-right p,
-.gara-card-center h3 {
-    margin: 4px 0;
+.gara-card-center p,
+.gara-card-center h3,
+.gara-card-center h5 {
+    margin: 2px 0;
 }
 
+.gara-card-center h3 {
+    font-size: 1.1rem;
+}
+
+.gara-card-center h5 {
+    font-size: 0.75rem;
+}
+
+/* Link centrato in basso */
 .gara-link {
-    display: inline-block;
-    margin-top: 10px;
+    flex: 0 0 100%;
+    order: 1;
+    text-align: center;
+    margin-top: 4px;
     color: var(--j4-dark-green);
     font-weight: 700;
     text-decoration: none;
@@ -97,9 +110,10 @@ h1 {
 }
 
 @media (max-width: 640px) {
-    .gara-card {
+    .gara-card,
+    .allenamento-card {
         justify-content: space-between;
-        gap: 8px 0;
+        gap: 4px 0;
     }
 
     .gara-card-left,

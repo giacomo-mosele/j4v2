@@ -5,6 +5,7 @@
     --j4-blue: #244096;
     --j4-light-green: #21a01d;
     --j4-text-black: #212529;
+    --sidebar-width: 220px;
 }
 
 body, html {
@@ -15,16 +16,9 @@ body, html {
 }
 
 .site-header {
-    /* background-color: red; */
     position: fixed;
     width: 100%;
     z-index: 100;
-}
-
-.content {
-    padding-top: 55px;
-    /*color: var(--j4-text-black);*/
-    margin-bottom: 30px;
 }
 
 .navbar {
@@ -55,11 +49,102 @@ body, html {
     text-decoration: none;
 }
 
-.container {
+body.layout-top .container {
     min-width: 100%; /* necessario, a quanto pare */
     margin-left: 5px;
 }
 
-.content {
+body.layout-top .content {
+    padding-top: 55px;
     margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    box-sizing: border-box;
+    background-color: var(--j4-dark-green);
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.sidebar-brand {
+    display: block;
+    padding: 0 24px;
+    margin-bottom: 24px;
+    color: white;
+    font-size: 25px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.sidebar-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 12px 24px;
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+    text-decoration: underline;
+}
+
+.sidebar-toggle {
+    display: none;
+}
+
+body.layout-side .content {
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    margin-bottom: 30px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: block;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 110;
+        padding: 6px 12px;
+        font-size: 20px;
+        color: white;
+        background-color: var(--j4-dark-green);
+        border: none;
+        border-radius: 0;
+    }
+
+    body.layout-side .content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
 }
