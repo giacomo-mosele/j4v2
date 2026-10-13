@@ -21,7 +21,7 @@ function aggiorna_classifica(payload) {
         const cell = document.createElement("td");
         cell.classList.add("table__cell");
         if (p < 0) cell.innerHTML = "";
-        else cell.innerHTML = valori[p]; // TODO: mettere il valore anziché 20
+        else cell.innerHTML = valori[p];
         valoriRow.append(cell);
     }
 
