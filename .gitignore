@@ -9,6 +9,9 @@ ssl/*.key
 
 run.py
 db_manager.py
+debug.py
 
 j4v2/static/images/meme/*
 !j4v2/static/images/meme/cane.png
+
+COMANDI_GIT.txt
