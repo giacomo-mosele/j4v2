@@ -162,7 +162,8 @@ def get_classifica_table():
         if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
             abort(403)
 
-    update_from_submissions(gara)
+    if gara.unix_start and not gara.start_manuale:
+        update_from_submissions(gara)
     
     valori_aggiornati = get_valori_aggiornati(gara)
     righe_aggiornate = get_righe_aggiornate(gara)
@@ -252,25 +253,43 @@ def inserimento_submission():
         if squadra.jolly_id is not None:
             flash("Errore: la squadra ha già piazzato un jolly in precedenza", "danger")
             return redirect(url_for("inserimento", id = id_gara))
+        squadra.jolly_id = problema.id
         if submissions_precedenti_giuste:
             stato_jolly = -1 # il jolly è piazzato dopo una submission corretta
         else:
             stato_jolly = 1
-            squadra.jolly_id = problema.id
 
-    new_submission = Submission(
-        gara_id = id_gara,
-        squadra_id = id_squadra,
-        problema_id = problema.id,
-        unix_time = int(datetime.now(timezone.utc).timestamp()),
-        risultato = risultato,
-        is_corretta = (risultato == problema.risultato),
-        bonus_associato = 0, # viene calcolato in update_from_submissions()
-        stato_jolly = stato_jolly,
-        is_scelta_jolly = is_jolly,
-        is_enabled = True,
-    )
-    db.session.add(new_submission)
+    stato_jolly_allenamento = 1
+    id_squadre_affette = [id_squadra]
+    if is_jolly and gara.is_allenamento:
+        if id_squadra != gara.squadre[0].id:
+            flash("Errore: solo il capitano può impostare il jolly", "danger")
+            return redirect(url_for("inserimento", id = id_gara))
+        
+        id_squadre_affette = [s.id for s in gara.squadre]
+        submissions_precedenti_giuste_team = Submission.query.filter_by(
+            is_enabled = True,
+            gara_id = id_gara,
+            problema_id = problema.id,
+            is_corretta = True
+        ).all()
+        if submissions_precedenti_giuste_team:
+            stato_jolly_allenamento = -1
+        squadra.jolly_id = problema.id
+
+    for idd in id_squadre_affette:
+        new_submission = Submission(
+            gara_id = id_gara,
+            squadra_id = idd,
+            problema_id = problema.id,
+            unix_time = int(datetime.now(timezone.utc).timestamp()),
+            risultato = risultato,
+            is_corretta = (risultato == problema.risultato),
+            stato_jolly = stato_jolly if not gara.is_allenamento else stato_jolly_allenamento,
+            is_scelta_jolly = is_jolly,
+            is_enabled = True,
+        )
+        db.session.add(new_submission)
     
     db.session.commit()
 

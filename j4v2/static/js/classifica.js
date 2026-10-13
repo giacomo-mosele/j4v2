@@ -30,16 +30,33 @@ function aggiorna_classifica(payload) {
         const rigaSquadra = righeSquadra[s];
         rigaSquadra.innerHTML = "";
         for (let p = 0; p < numero_problemi + 3; p++) {
+            const dato = righe[s][p];
             const cell = document.createElement("td");
             cell.classList.add("table__cell");
-            cell.innerHTML = righe[s][p];
+            cell.textContent = dato[0];
+            if (p >= 3) {
+                if (dato[1] === -1) cell.classList.add("casellina-1");
+                if (dato[1] === 1) cell.classList.add("casellina1");
+                if (dato[2] === 1) cell.classList.add("jolly");
+            }
             rigaSquadra.append(cell);
         }
     }
 
     const righeOrdinate = righe
         .map((riga, indice) => ({ dati: riga, elemento: righeSquadra[indice] }))
-        .sort((a, b) => Number(a.dati[0]) - Number(b.dati[0]));
+        .sort((a, b) => {
+            const posizioneA = a.dati[0][0];
+            const posizioneB = b.dati[0][0];
+            const ospiteA = typeof posizioneA === "string" && posizioneA.startsWith("G");
+            const ospiteB = typeof posizioneB === "string" && posizioneB.startsWith("G");
+
+            if (ospiteA !== ospiteB) return ospiteA ? 1 : -1;
+
+            const numeroA = Number(ospiteA ? posizioneA.slice(1) : posizioneA);
+            const numeroB = Number(ospiteB ? posizioneB.slice(1) : posizioneB);
+            return numeroA - numeroB;
+        });
     const contenitoreRighe = righeSquadra[0]?.parentElement;
     if (!contenitoreRighe) return;
 
@@ -74,7 +91,7 @@ async function aggiornaPeriodicamente() {
     } catch (error) {
         console.error(error);
     } finally {
-        setTimeout(aggiornaPeriodicamente, 5000);
+        setTimeout(aggiornaPeriodicamente, 3000);
     }
 }
 

@@ -141,10 +141,6 @@ class Problema(db.Model):
 
     VALORE = db.Column(db.Integer, nullable = True, default = 20)
 
-    @property
-    def numero_risoluzioni(self):
-        return len([s for s in self.submissions if s.is_corretta])
-
     def __repr__(self):
         return f"Problema({self.titolo})"
 
@@ -163,8 +159,9 @@ class Squadra(db.Model):
     jolly_id = db.Column(db.Integer, db.ForeignKey("problema.id", name = "fk_squadra_jolly"), nullable = True)
 
     bonus_punti = db.Column(db.Integer, nullable = False, default = 0)
+    
     ha_fullato = db.Column(db.Boolean, nullable = False, default = False)
-    bonus_full = db.Column(db.Integer, nullable = False, default = 0)
+    unix_time_full = db.Column(db.BigInteger, nullable = True)
 
     def __repr__(self):
         return f"Squadra({self.nome}) per {self.gara}"
@@ -178,7 +175,6 @@ class Submission(db.Model):
     unix_time = db.Column(db.BigInteger, nullable = False)
     risultato = db.Column(db.Integer, nullable = False)
     is_corretta = db.Column(db.Boolean, nullable = False)
-    bonus_associato = db.Column(db.Integer, nullable = False)
 
     stato_jolly = db.Column(db.Integer, nullable = False) # 0 = non jolly, 1 = jolly piazzato prima, -1 = jolly piazzato dopo
     is_scelta_jolly = db.Column(db.Boolean, nullable = False, default = False) # se è True, stato_jolly deve essere 1 o -1

@@ -37,6 +37,7 @@
     border: 1px solid black;
     border-radius: 4px;
     white-space: nowrap;
+    font-size: 24px;
 }
 
 .casellina-1 {
@@ -48,5 +49,5 @@
 }
 
 .jolly {
-    box-shadow: 0px 0px 0px 3px yellow inset;
+    box-shadow: 0px 0px 0px 4px yellow inset;
 }
