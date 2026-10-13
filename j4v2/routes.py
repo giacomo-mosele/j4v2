@@ -345,9 +345,7 @@ def richiedi_gara():
                     identificativo_squadra = ''.join(random.choices(string.ascii_uppercase, k = 6)),
                     codice_accesso_squadra = ''.join(random.choices(string.digits, k = 6)),
                     bonus_punti = 0,
-                    # TODO: capire se servono i seguenti due
-                    ha_fullato = False,
-                    bonus_full = 0
+                    ha_fullato = False
                 )
                 db.session.add(new_squadra)
 
