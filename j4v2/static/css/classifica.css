@@ -17,8 +17,32 @@
     margin-bottom: 40px;
 }
 
+#tempoLabel.tempo-oscurato {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 101;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    #tempoLabel.tempo-oscurato {
+        width: 70vw;
+        max-width: 70vw;
+        font-size: min(12vw, 12vh, 100px);
+        line-height: 1;
+        white-space: nowrap;
+    }
+}
+
 .classifica-table {
     background-color: white;
+}
+
+.classifica-table.classifica-nascosta {
+    display: none !important;
 }
 /*
 .table__row:nth-child(odd) {

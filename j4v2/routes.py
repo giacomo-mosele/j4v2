@@ -164,9 +164,8 @@ def get_classifica_table():
 
     if gara.unix_start and not gara.start_manuale:
         update_from_submissions(gara)
-    
-    valori_aggiornati = get_valori_aggiornati(gara)
-    righe_aggiornate = get_righe_aggiornate(gara)
+
+    secondi_passati = 0
 
     tempo_label = "Non è stato ancora fissato l'inizio di questa gara"
     if ( not gara.start_manuale and gara.unix_start ):
@@ -181,12 +180,18 @@ def get_classifica_table():
             total = (gara.durata * 60) - secondi_passati
             hours, remainder = divmod(total, 3600)
             minutes, seconds = divmod(remainder, 60)
-            tempo_label = f"{hours} h {minutes:02} min {seconds:02} sec"
+            tempo_label = (f"{hours} h " if hours else "") + (f"{minutes:02} min " if minutes or hours else "") + f"{seconds:02} sec"
+
+    oscuramento = ( (gara.durata * 60 - secondi_passati) <= gara.minuti_oscuri * 60 ) and not secondi_passati > gara.durata * 60
+
+    valori_aggiornati = get_valori_aggiornati(gara) if not oscuramento else None
+    righe_aggiornate = get_righe_aggiornate(gara) if not oscuramento else None
 
     return jsonify({
         "valori": valori_aggiornati,
         "righe": righe_aggiornate,
-        "tempo": tempo_label
+        "tempo": tempo_label,
+        "oscuramento": 1 if oscuramento else 0
     })
 
 

@@ -1,19 +1,22 @@
 const valoriRow = document.getElementById("valoriRow");
 const tempoLabel = document.getElementById("tempoLabel");
+const classificaTable = document.getElementById("classificaTable");
 
 function aggiorna_classifica(payload) {
+    const oscuramento = Number(payload.oscuramento) === 1;
+    classificaTable.classList.toggle("classifica-nascosta", oscuramento);
+    tempoLabel.classList.toggle("tempo-oscurato", oscuramento);
+    tempoLabel.innerHTML = payload.tempo;
+    if (oscuramento) return;
+
     const valori = payload.valori;
     const righe = payload.righe;
-    const tempo = payload.tempo;
     const righeSquadra = Array.from({ length: numero_squadre }, (_, indice) =>
         document.getElementById(`squadraRow_${indice}`)
     );
     const posizioniIniziali = new Map(
         righeSquadra.map((riga) => [riga, riga.getBoundingClientRect().top])
     );
-
-    // AGGIORNA TEMPO
-    tempoLabel.innerHTML = tempo;
 
     // AGGIORNA VALORI
     valoriRow.innerHTML = "";
