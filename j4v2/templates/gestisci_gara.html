@@ -1,13 +1,19 @@
 {% extends "layout.html" %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="/static/css/inserimento.css">
+    <link rel="stylesheet" href="/static/css/gestisci_gara.css">
 {% endblock %}
 
 {% block content %}
-    <div class="inserimento-header">
-        <h1 id="titleH1">Inserimento</h1>
+    <div class="gestisci-header">
+        <h1 id="titleH1">Gestisci gara</h1>
         <h2>{{ gara.titolo }}</h2>
+    </div>
+
+    <!-- TODO: pulsante per start manuale -->
+
+    <div class="inserimento-header">
+        <h1 id="inserimentoH1">Inserimento</h1>
     </div>
 
     <div class="table-responsive inserimento-table-wrapper">
@@ -97,5 +103,5 @@
         const numero_squadre = parseInt("{{ gara.numero_squadre }}");
     </script>
 
-    <script src="/static/js/inserimento.js"></script>
+    <script src="/static/js/gestisci_gara.js"></script>
 {% endblock %}

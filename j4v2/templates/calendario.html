@@ -30,6 +30,9 @@
                             <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
                             <p>{{ gara.problemi | length }} problemi</p>
                             <a class="gara-link" href="/visualizza_gara?id={{ gara.id }}">{{ 'Vedi allenamento' if gara.is_allenamento else 'Vedi gara' }}</a>
+                            {% if current_user.is_authenticated and ( current_user.ruolo >= 1 or current_user in gara.user_controllanti or current_user == gara.richiedente ) %}
+                                <a class="gestisci-link" href="/gestisci_gara?id={{ gara.id }}">{{ 'Gestisci allenamento' if gara.is_allenamento else 'Gestisci gara' }}</a>
+                            {% endif %}
                         </div>
                     </div>
                 </li>

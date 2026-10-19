@@ -84,7 +84,8 @@ h1 {
     margin: 4px 0;
 }
 
-.gara-link {
+.gara-link,
+.gestisci-link {
     display: inline-block;
     margin-top: 10px;
     color: var(--j4-dark-green);
@@ -92,7 +93,12 @@ h1 {
     text-decoration: none;
 }
 
-.gara-link:hover {
+.gestisci-link {
+    display: block;
+}
+
+.gara-link:hover,
+.gestisci-link:hover {
     text-decoration: underline;
 }
 

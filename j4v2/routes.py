@@ -168,7 +168,7 @@ def get_classifica_table():
     secondi_passati = 0
 
     tempo_label = "Non è stato ancora fissato l'inizio di questa gara"
-    if ( not gara.start_manuale and gara.unix_start ):
+    if ( gara.unix_start and not gara.start_manuale ):
         secondi_passati = int(datetime.now(timezone.utc).timestamp()) - gara.unix_start
         if secondi_passati < 0:
             tempo_label = f"La gara inizierà alle {gara.datetime_formattato['orario']}"
@@ -195,8 +195,8 @@ def get_classifica_table():
     })
 
 
-@app.route("/inserimento")
-def inserimento():
+@app.route("/gestisci_gara")
+def gestisci_gara():
     id = request.args.get("id")
     gara = Gara.query.get(id)
     if not gara:
@@ -206,7 +206,7 @@ def inserimento():
     if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
         abort(403)
 
-    return render_template("inserimento.html", title = "Inserimento", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
+    return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
 
 
 @app.route("/inserimento/submission", methods = ["POST"])
@@ -257,7 +257,7 @@ def inserimento_submission():
     if is_jolly:
         if squadra.jolly_id is not None:
             flash("Errore: la squadra ha già piazzato un jolly in precedenza", "danger")
-            return redirect(url_for("inserimento", id = id_gara))
+            return redirect(url_for("gestisci_gara", id = id_gara))
         squadra.jolly_id = problema.id
         if submissions_precedenti_giuste:
             stato_jolly = -1 # il jolly è piazzato dopo una submission corretta
@@ -269,7 +269,7 @@ def inserimento_submission():
     if is_jolly and gara.is_allenamento:
         if id_squadra != gara.squadre[0].id:
             flash("Errore: solo il capitano può impostare il jolly", "danger")
-            return redirect(url_for("inserimento", id = id_gara))
+            return redirect(url_for("gestisci_gara", id = id_gara))
         
         id_squadre_affette = [s.id for s in gara.squadre]
         submissions_precedenti_giuste_team = Submission.query.filter_by(
@@ -298,7 +298,7 @@ def inserimento_submission():
     
     db.session.commit()
 
-    return redirect(url_for("inserimento", id = id_gara))
+    return redirect(url_for("gestisci_gara", id = id_gara))
 
 
 @app.route("/richiedi_gara", methods = ["GET", "POST"])
