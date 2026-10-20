@@ -15,11 +15,18 @@ import string
 @app.before_request
 def aggiorna_database_preprocessor():
     now_unix = int(datetime.now(timezone.utc).timestamp())
+
     gare_da_attualizzare = Gara.query.filter(Gara.unix_start != None, Gara.unix_start <= now_unix, Gara.stato == 1).all()
     if gare_da_attualizzare:
         for gara in gare_da_attualizzare:
             gara.stato = 2
-        db.session.commit()
+
+    gare_da_archiviare = Gara.query.filter(Gara.unix_start != None, Gara.unix_start + Gara.durata * 60 + 86400 <= now_unix, Gara.stato == 2).all()
+    if gare_da_archiviare:
+        for gara in gare_da_archiviare:
+            gara.stato = 3
+    
+    db.session.commit()
 
 @app.before_request
 def enforce_ban():
@@ -191,7 +198,10 @@ def get_classifica_table():
         "valori": valori_aggiornati,
         "righe": righe_aggiornate,
         "tempo": tempo_label,
-        "oscuramento": 1 if oscuramento else 0
+        "oscuramento": 1 if oscuramento else 0,
+        "classifica_archiviata": secondi_passati > gara.durata * 60 + 86400,
+        "squadre_nascoste": min(gara.top_n_squadre_nascoste, gara.numero_squadre - gara.numero_ospiti),
+        "numero_squadre_non_ospiti": gara.numero_squadre - gara.numero_ospiti
     })
 
 
