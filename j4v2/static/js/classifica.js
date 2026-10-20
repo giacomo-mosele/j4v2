@@ -138,7 +138,7 @@ mostraPosizioni.addEventListener("click", (event) => {
 
 async function aggiornaPeriodicamente() {
     try {
-        const response = await fetch(`/get_classifica_table?id=${id_gara}`);
+        const response = await fetch(`/gare/${id_gara}/get_classifica_table`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         aggiorna_classifica(await response.json());
     } catch (error) {

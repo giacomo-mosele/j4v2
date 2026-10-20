@@ -128,9 +128,10 @@ def archivio_gare():
     gare_terminate.sort(key = lambda g: g.unix_start, reverse = True)
     return render_template("archivio_gare.html", title = "Archivio gare", gare_terminate = gare_terminate)
 
-@app.route("/visualizza_gara")
-def visualizza_gara():
-    id = request.args.get("id")
+
+
+@app.route("/gare/<id>/preview")
+def visualizza_gara(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -143,9 +144,8 @@ def visualizza_gara():
     return render_template("visualizza_gara.html", title = f"Preview: {gara.titolo}", gara = gara)
 
 
-@app.route("/classifica")
-def classifica():
-    id = request.args.get("id")
+@app.route("/gare/<id>/classifica")
+def classifica(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -157,9 +157,8 @@ def classifica():
 
     return render_template("classifica.html", title = gara.titolo, gara = gara.basic_dict())
 
-@app.route("/get_classifica_table")
-def get_classifica_table():
-    id = request.args.get("id")
+@app.route("/gare/<id>/get_classifica_table")
+def get_classifica_table(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -205,9 +204,8 @@ def get_classifica_table():
     })
 
 
-@app.route("/gestisci_gara")
-def gestisci_gara():
-    id = request.args.get("id")
+@app.route("/gare/<id>/gestisci")
+def gestisci_gara(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -219,8 +217,8 @@ def gestisci_gara():
     return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
 
 
-@app.route("/inserimento/submission", methods = ["POST"])
-def inserimento_submission():
+@app.route("/inserimento/submission_admin", methods = ["POST"])
+def inserimento_submission_admin():
     id_gara = request.form.get("gara_id")
     id_squadra = request.form.get("squadra_id")
     numero_problema = request.form.get("problema_numero")
