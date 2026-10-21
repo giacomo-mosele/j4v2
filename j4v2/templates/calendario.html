@@ -13,9 +13,7 @@
             {% for gara in gare_in_corso %}
                 <li class="gara-li">
                     <div class="{{ 'allenamento-card' if gara.is_allenamento else 'gara-card' }}">
-                        <div class="pallino">
-                                <span class="live-dot" title="In corso"></span>
-                        </div>
+                        <span class="live-dot" title="In corso"></span>
                         <div class="gara-card-left">
                             <p>{{ gara.datetime_formattato.data_estesa }}</p>
                             <p>Iniziata alle {{ gara.datetime_formattato.orario }}</p>

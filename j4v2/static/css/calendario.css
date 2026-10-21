@@ -59,7 +59,7 @@ h1 {
     justify-content: space-between;
     align-items: flex-start;
     border-radius: 10px;
-    gap: 12px 20px;
+    gap: 4px 20px;
     width: min(850px, 85vw);
     margin: 0 auto;
     padding: 12px 18px;
@@ -90,7 +90,7 @@ h1 {
     flex: 0 0 100%;
     text-align: center;
     order: -1;
-    margin-bottom: 4px;
+    margin-bottom: 0;
 }
 
 .gara-card-right {
@@ -99,7 +99,9 @@ h1 {
 
 .gara-card-left p,
 .gara-card-right p,
-.gara-card-center h3 {
+.gara-card-center p,
+.gara-card-center h3,
+.gara-card-center h5 {
     margin: 4px 0;
 }
 
