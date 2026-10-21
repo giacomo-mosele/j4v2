@@ -112,7 +112,13 @@ def calendario():
     ).all()
     gare_lontane.sort(key = lambda g: g.unix_start)
 
-    return render_template("calendario.html", title = "Calendario", gare_in_corso = gare_in_corso, gare_prossime = gare_prossime, gare_future = gare_lontane + gare_da_startare)
+    return render_template("calendario.html",
+        title = "Calendario",
+        gare_in_corso = gare_in_corso,
+        gare_prossime = gare_prossime,
+        gare_future = gare_lontane + gare_da_startare,
+        server_time = now_unix
+    )
 
 @app.route("/archivio_gare")
 def archivio_gare():

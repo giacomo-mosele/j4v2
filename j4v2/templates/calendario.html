@@ -13,7 +13,9 @@
             {% for gara in gare_in_corso %}
                 <li class="gara-li">
                     <div class="{{ 'allenamento-card' if gara.is_allenamento else 'gara-card' }}">
-                        <span class="live-dot" title="In corso"></span>
+                        {% if gara.unix_start + gara.durata * 60 > server_time %}
+                            <span class="live-dot" title="In corso"></span>
+                        {% endif %}
                         <div class="gara-card-left">
                             <p>{{ gara.datetime_formattato.data_estesa }}</p>
                             <p>Iniziata alle {{ gara.datetime_formattato.orario }}</p>
@@ -65,7 +67,12 @@
                         <div class="gara-card-right">
                             <p>{{ gara.squadre | length }} {{ 'partecipanti' if gara.is_allenamento else 'squadre' }}</p>
                             <p>{{ gara.problemi | length }} problemi</p>
+                        </div>
+                        <div class="gara-card-down">
                             <a class="gara-link" href="/gare/{{ gara.id }}/preview">{{ 'Vedi allenamento' if gara.is_allenamento else 'Vedi gara' }}</a>
+                            {% if current_user.is_authenticated and ( current_user.ruolo >= 1 or current_user in gara.user_controllanti or current_user == gara.richiedente ) %}
+                                <a class="gestisci-link" href="/gare/{{ gara.id }}/gestisci">{{ 'Gestisci allenamento' if gara.is_allenamento else 'Gestisci gara' }}</a>
+                            {% endif %}
                         </div>
                     </div>
                 </li>
