@@ -20,5 +20,5 @@
         <p>{{ problema.titolo }}</p>
     {% endfor %}
 
-    <a class="gara-link" href="/classifica?id={{ gara.id }}">{{ 'Vedi tabellone' if gara.is_allenamento else 'Vedi classifica' }}</a>
+    <a class="gara-link" href="/gare/{{ gara.id }}/classifica">{{ 'Vedi tabellone' if gara.is_allenamento else 'Vedi classifica' }}</a>
 {% endblock %}

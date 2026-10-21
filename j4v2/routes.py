@@ -15,11 +15,18 @@ import string
 @app.before_request
 def aggiorna_database_preprocessor():
     now_unix = int(datetime.now(timezone.utc).timestamp())
+
     gare_da_attualizzare = Gara.query.filter(Gara.unix_start != None, Gara.unix_start <= now_unix, Gara.stato == 1).all()
     if gare_da_attualizzare:
         for gara in gare_da_attualizzare:
             gara.stato = 2
-        db.session.commit()
+
+    gare_da_archiviare = Gara.query.filter(Gara.unix_start != None, Gara.unix_start + Gara.durata * 60 + 86400 <= now_unix, Gara.stato == 2).all()
+    if gare_da_archiviare:
+        for gara in gare_da_archiviare:
+            gara.stato = 3
+    
+    db.session.commit()
 
 @app.before_request
 def enforce_ban():
@@ -121,9 +128,10 @@ def archivio_gare():
     gare_terminate.sort(key = lambda g: g.unix_start, reverse = True)
     return render_template("archivio_gare.html", title = "Archivio gare", gare_terminate = gare_terminate)
 
-@app.route("/visualizza_gara")
-def visualizza_gara():
-    id = request.args.get("id")
+
+
+@app.route("/gare/<id>/preview")
+def visualizza_gara(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -136,9 +144,8 @@ def visualizza_gara():
     return render_template("visualizza_gara.html", title = f"Preview: {gara.titolo}", gara = gara)
 
 
-@app.route("/classifica")
-def classifica():
-    id = request.args.get("id")
+@app.route("/gare/<id>/classifica")
+def classifica(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -150,9 +157,8 @@ def classifica():
 
     return render_template("classifica.html", title = gara.titolo, gara = gara.basic_dict())
 
-@app.route("/get_classifica_table")
-def get_classifica_table():
-    id = request.args.get("id")
+@app.route("/gare/<id>/get_classifica_table")
+def get_classifica_table(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -191,13 +197,15 @@ def get_classifica_table():
         "valori": valori_aggiornati,
         "righe": righe_aggiornate,
         "tempo": tempo_label,
-        "oscuramento": 1 if oscuramento else 0
+        "oscuramento": 1 if oscuramento else 0,
+        "classifica_archiviata": secondi_passati > gara.durata * 60 + 86400,
+        "squadre_nascoste": min(gara.top_n_squadre_nascoste, gara.numero_squadre - gara.numero_ospiti),
+        "numero_squadre_non_ospiti": gara.numero_squadre - gara.numero_ospiti
     })
 
 
-@app.route("/gestisci_gara")
-def gestisci_gara():
-    id = request.args.get("id")
+@app.route("/gare/<id>/gestisci")
+def gestisci_gara(id):
     gara = Gara.query.get(id)
     if not gara:
         abort(404)
@@ -209,8 +217,8 @@ def gestisci_gara():
     return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
 
 
-@app.route("/inserimento/submission", methods = ["POST"])
-def inserimento_submission():
+@app.route("/inserimento/submission_admin", methods = ["POST"])
+def inserimento_submission_admin():
     id_gara = request.form.get("gara_id")
     id_squadra = request.form.get("squadra_id")
     numero_problema = request.form.get("problema_numero")

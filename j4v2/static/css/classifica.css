@@ -17,6 +17,18 @@
     margin-bottom: 40px;
 }
 
+.mostra-posizioni {
+    display: inline-block;
+    margin-top: -30px;
+    margin-bottom: 20px;
+    color: var(--j4-dark-green);
+    font-weight: 700;
+}
+
+.mostra-posizioni[hidden] {
+    display: none;
+}
+
 #tempoLabel.tempo-oscurato {
     position: fixed;
     top: 50%;
