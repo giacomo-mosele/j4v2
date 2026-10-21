@@ -1,6 +1,42 @@
 const valoriRow = document.getElementById("valoriRow");
 const tempoLabel = document.getElementById("tempoLabel");
 const classificaTable = document.getElementById("classificaTable");
+const effettiAttivi = new Map();
+const ultimiInvii = new Map();
+let primoAggiornamento = true;
+
+const durataLampeggio = {
+    soluzioneCorretta: 10_000,
+    soluzioneSbagliata: 10_000,
+    jollyCorretto: 10_000,
+    jollySbagliato: 5_000,
+};
+
+function rilevaNuoviInvii(righe) {
+    for (let squadra = 0; squadra < righe.length; squadra++) {
+        for (let problema = 0; problema < numero_problemi; problema++) {
+            const dato = righe[squadra][problema + 3];
+            const idInvio = dato[3];
+            if (idInvio === null || idInvio === undefined) continue;
+
+            const chiave = `${squadra}-${problema}`;
+            if (!primoAggiornamento && ultimiInvii.get(chiave) !== idInvio && dato[5] !== 1) {
+                const corretto = dato[4] === 1;
+                const jolly = dato[2] === 1;
+                const tipo = jolly
+                    ? (corretto ? "jolly-corretta" : "jolly-sbagliata")
+                    : (corretto ? "soluzione-corretta" : "soluzione-sbagliata");
+                const durata = jolly
+                    ? (corretto ? durataLampeggio.jollyCorretto : durataLampeggio.jollySbagliato)
+                    : (corretto ? durataLampeggio.soluzioneCorretta : durataLampeggio.soluzioneSbagliata);
+
+                effettiAttivi.set(chiave, { tipo, scadenza: Date.now() + durata });
+            }
+            ultimiInvii.set(chiave, idInvio);
+        }
+    }
+    primoAggiornamento = false;
+}
 
 function aggiorna_classifica(payload) {
     const oscuramento = Number(payload.oscuramento) === 1;
@@ -11,6 +47,7 @@ function aggiorna_classifica(payload) {
 
     const valori = payload.valori;
     const righe = payload.righe;
+    rilevaNuoviInvii(righe);
     const righeSquadra = Array.from({ length: numero_squadre }, (_, indice) =>
         document.getElementById(`squadraRow_${indice}`)
     );
@@ -31,6 +68,7 @@ function aggiorna_classifica(payload) {
     // AGGIORNA RIGHE SQUADRE
     for (let s = 0; s < numero_squadre; s++) {
         const rigaSquadra = righeSquadra[s];
+        rigaSquadra.classList.remove("jolly-corretta", "jolly-sbagliata");
         rigaSquadra.innerHTML = "";
         for (let p = 0; p < numero_problemi + 3; p++) {
             const dato = righe[s][p];
@@ -41,9 +79,22 @@ function aggiorna_classifica(payload) {
                 if (dato[1] === -1) cell.classList.add("casellina-1");
                 if (dato[1] === 1) cell.classList.add("casellina1");
                 if (dato[2] === 1) cell.classList.add("jolly");
+
+                const effetto = effettiAttivi.get(`${s}-${p - 3}`);
+                if (effetto && effetto.scadenza > Date.now()) {
+                    if (effetto.tipo.startsWith("jolly-")) {
+                        rigaSquadra.classList.add(effetto.tipo);
+                    } else {
+                        cell.classList.add(effetto.tipo);
+                    }
+                }
             }
             rigaSquadra.append(cell);
         }
+    }
+
+    for (const [chiave, effetto] of effettiAttivi) {
+        if (effetto.scadenza <= Date.now()) effettiAttivi.delete(chiave);
     }
 
     const righeOrdinate = righe

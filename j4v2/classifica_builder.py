@@ -165,7 +165,7 @@ def get_righe_aggiornate(gara: Gara):
 
     def RIGA(squadra: Squadra):
         subs_squadra = squadra.submissions
-        subs_per_problema = {problema.id: [] for problema in gara.problemi}
+        subs_per_problema = {problema.id: [] for problema in gara.problemi} # dict int -> list[Submission]
         for sub in subs_squadra:
             if sub.is_enabled:
                 subs_per_problema[sub.problema_id].append(sub)
@@ -176,6 +176,11 @@ def get_righe_aggiornate(gara: Gara):
             colore = 0
             stato_jolly = 0
             gia_corretta = False
+            ultimo_invio = max(
+                subs_per_problema[problema.id],
+                key = lambda sub: (sub.unix_time, sub.id),
+                default = None
+            )
             for sub in subs_per_problema[problema.id]:
                 mult = 2 if stato_jolly == 1 else 1
                 if sub.is_scelta_jolly:
@@ -196,7 +201,14 @@ def get_righe_aggiornate(gara: Gara):
                     gia_corretta = True
                     colore = 1
             
-            celle[problema.id] = (punteggio, colore, abs(stato_jolly))
+            celle[problema.id] = (
+                punteggio,
+                colore,
+                abs(stato_jolly),
+                ultimo_invio.id if ultimo_invio else None,
+                int(ultimo_invio.is_corretta) if ultimo_invio else 0,
+                int(ultimo_invio.is_scelta_jolly) if ultimo_invio else 0
+            )
 
         bonus_full = 0
         if squadra.ha_fullato:
