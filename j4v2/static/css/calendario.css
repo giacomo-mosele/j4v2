@@ -33,15 +33,34 @@ h1 {
     margin-bottom: 10px;
 }
 
+.live-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: var(--j4-light-green);
+    animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(33, 160, 29, 0.6); }
+    70%  { box-shadow: 0 0 0 8px rgba(33, 160, 29, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(33, 160, 29, 0); }
+}
+
 .gara-card,
 .allenamento-card {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
-    border-radius: 15px;
-    gap: 12px 20px;
-    width: min(1000px, 85vw);
+    border-radius: 10px;
+    gap: 4px 20px;
+    width: min(850px, 85vw);
     margin: 0 auto;
     padding: 12px 18px;
     box-sizing: border-box;
@@ -71,7 +90,7 @@ h1 {
     flex: 0 0 100%;
     text-align: center;
     order: -1;
-    margin-bottom: 4px;
+    margin-bottom: 0;
 }
 
 .gara-card-right {
@@ -80,22 +99,30 @@ h1 {
 
 .gara-card-left p,
 .gara-card-right p,
-.gara-card-center h3 {
+.gara-card-center p,
+.gara-card-center h3,
+.gara-card-center h5 {
     margin: 4px 0;
+}
+
+.gara-card-down {
+    flex: 0 0 100%;
+    order: 99;               
+    display: flex;
+    justify-content: center;  
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    margin-top: 4px;
 }
 
 .gara-link,
 .gestisci-link {
-    display: inline-block;
-    margin-top: 10px;
+    display: block;
     color: var(--j4-dark-green);
     font-weight: 700;
     text-decoration: none;
 }
 
-.gestisci-link {
-    display: block;
-}
 
 .gara-link:hover,
 .gestisci-link:hover {
