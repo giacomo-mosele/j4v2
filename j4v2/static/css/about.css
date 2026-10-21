@@ -1,0 +1,50 @@
+.content {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    place-items: center;
+}
+
+#titleH1 {
+    font-size: 60px;
+}
+
+#subtitleH4 {
+    margin-bottom: 40px;
+}
+
+.testo {
+    font-size: 16px;
+    width: min(90vw, 1200px);
+}
+
+.corsivo {
+    font-style: italic;
+}
+
+#coppaBiennio2024 {
+    width: min(90vw, 600px);
+}
+
+.contributors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: min(90vw, 400px);
+}
+
+.contributor {
+    margin: 0;
+}
+
+.contributor img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+a {
+    color: var(--j4-dark-green);
+    font-weight: 700;
+}

@@ -58,6 +58,10 @@ def page_not_found(e):
 def index():
     return redirect(url_for("calendario"))
 
+@app.route("/about")
+def about():
+    return render_template("about.html", title = "About")
+
 @app.route("/calendario")
 def calendario():
     now_unix = int(datetime.now(timezone.utc).timestamp())

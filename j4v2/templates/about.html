@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/about.css">
+{% endblock %}
+
+{% block content %}
+    <h1 id="titleH1">Jeiquarta</h1>
+    <h4 id="subtitleH4">Quando il bisogno incontra il sudore</h4>
+    <p class="testo corsivo">"Dai a un uomo gara.json e farà una gara. Dagli un account j4v2 e si setupperà le gare da solo senza disturbarti"</p>
+    <p class="testo">-Mosy, probabilmente</p>
+    <br>
+    <p class="testo">Jeiquarta (per gli OG J^4) nasce nell'autunno 2023, quando al Cassini c'è un problema molto concreto da risolvere: "Come gestiamo le gare di matematica interne, senza fare sussate tipo excel o classifiche su carta?"</p>
+    <p class="testo">Fortunatamente, un gran sudato che risponde al nome di Mosy, decide di risolvere il problema personalmente. Pur essendo in terza e non avendo la minima idea di come funzioni la programmazione web, scrive una webapp rudimentale che supporta una gara alla volta. Sulla scia di phiquadro e xicubo (il software usato fino al 2022 al Cassini), la chiama J^4 (che diventerà Jeiquarta).</p>
+    <p class="testo">Questa prima versione funziona abbastanza bene e viene usata per tre anni in tutte le gare interne del Cassini. Peccato che il codice sia scritto un po' come capita, e sostanzialmente impossibile da debuggare.</p>
+    <img id="coppaBiennio2024" src="/static/images/cb_24.png" alt="prova">
+    <p class="testo corsivo">Coppa Biennio 2024: una delle prime gare gestite con Jeiquarta</p>
+    <br>
+    <p class="testo">Tre anni dopo, nell'autunno 2026, le limitazioni di questa prima versione di Jeiquarta spingono Mosy (un po' meno babbo che nel 2023) a riscrivere tutto il codice, in modo più ordinato e aggiungendo molte feature, tra cui la possibilità di gestire più gare contemporaneamente.</p>
+    <p class="testo">Nell'opera Mosy viene aiutato, oltre che dall'AI di VS Code (che è goated), dal sudatissimo Juna, che passa la notte a migliorare le grafiche anziché dormire o studiare.</p>
+    <br>
+    <p class="testo">
+        Jeiquarta è open source! Il codice del sito che state utilizzando in questo momento si può trovare a
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/giacomo-mosele/j4v2">questa repository</a>.
+        Leggetela, clonatela, forkatela, fateci quello che volete. E soprattutto, segnalateci bug!
+    </p>
+    <br>
+    <p class="testo">Buon divertimento!</p>
+    <br>
+    <p class="testo">Contributors:</p>
+    <div class="contributors">
+        <figure class="contributor">
+            <img src="https://github.com/giacomo-mosele.png" alt="Foto profilo GitHub di giacomo-mosele">
+            <figcaption><a target="_blank" rel="noopener noreferrer" href="https://github.com/giacomo-mosele">giacomo-mosele</a></figcaption>
+        </figure>
+        <figure class="contributor">
+            <img src="https://github.com/junawaza.png" alt="Foto profilo GitHub di junawaza">
+            <figcaption><a target="_blank" rel="noopener noreferrer" href="https://github.com/junawaza">junawaza</a></figcaption>
+        </figure>
+    </div>
+{% endblock %}
