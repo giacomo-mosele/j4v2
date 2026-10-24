@@ -12,6 +12,7 @@
     {% if current_user.ruolo >= 1 %}
         <details class="management-dropdown mt-4">
             <summary>Gestione richieste di gare e allenamenti</summary>
+            <div class="dropdown-panel">
             {% if richieste_gare %}
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
@@ -30,7 +31,7 @@
                                     <td>{{ "Allenamento" if gara.is_allenamento else "Gara" }}</td>
                                     <td>{{ gara.richiedente.username if gara.richiedente else "Utente non disponibile" }}</td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" type="button" disabled title="La pagina di dettaglio sarà disponibile in seguito">Dettagli (in arrivo)</button>
+                                        <a class="btn btn-primary btn-sm" href="{{ url_for('revisiona_gara', gara_id=gara.id) }}">Revisiona richiesta</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -40,10 +41,12 @@
             {% else %}
                 <p>Non ci sono richieste di gare o allenamenti in attesa.</p>
             {% endif %}
+            </div>
         </details>
 
         <details class="management-dropdown mt-4">
             <summary>Gestione utenti</summary>
+            <div class="dropdown-panel">
             <section class="mt-3">
                 <h2>Richieste di creazione account</h2>
                 {% if richieste_account %}
@@ -163,6 +166,7 @@
                     {% endif %}
                 {% endfor %}
             </section>
+            </div>
         </details>
     {% endif %}
 
@@ -191,6 +195,7 @@
 
 {% block extra_script %}
     {% if current_user.ruolo >= 1 %}
+        <script src="{{ url_for('static', filename='js/details_dropdown.js') }}"></script>
         <script>
             document.getElementById("confirm-user-action").addEventListener("show.bs.modal", function (event) {
                 const trigger = event.relatedTarget;

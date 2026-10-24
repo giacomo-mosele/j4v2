@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/revisiona_gara.css">
+{% endblock %}
+
+{% block content %}
+    <h1>Revisiona richiesta</h1>
+    <h2>{{ "Allenamento" if gara.is_allenamento else "Gara" }}: {{ gara.titolo }}</h2>
+
+    <section class="mt-4">
+        <h3>Richiedente</h3>
+        {% if gara.richiedente %}
+            <p class="mb-1"><strong>Username:</strong> {{ gara.richiedente.username }}</p>
+            <p class="mb-1"><strong>Nome:</strong> {{ gara.richiedente.nome }} {{ gara.richiedente.cognome }}</p>
+            <p><strong>Email:</strong> {{ gara.richiedente.email }}</p>
+        {% else %}
+            <p>Utente richiedente non disponibile.</p>
+        {% endif %}
+    </section>
+
+    <section class="mt-4">
+        <h3>Dettagli {{ "dell'allenamento" if gara.is_allenamento else "della gara" }}</h3>
+        <dl class="row">
+            <dt class="col-sm-4">Inizio</dt>
+            <dd class="col-sm-8">
+                {% if gara.start_manuale %}
+                    Avvio manuale
+                {% elif gara.datetime_formattato %}
+                    {{ gara.datetime_formattato.datetime_esteso }}
+                {% else %}
+                    Non specificato
+                {% endif %}
+            </dd>
+
+            <dt class="col-sm-4">Durata</dt>
+            <dd class="col-sm-8">{{ gara.durata }} minuti</dd>
+
+            <dt class="col-sm-4">Visibilità</dt>
+            <dd class="col-sm-8">{{ "Pubblica" if gara.is_pubblica else "Privata" }}</dd>
+
+            {% if not gara.is_allenamento %}
+                <dt class="col-sm-4">n</dt>
+                <dd class="col-sm-8">{{ gara.n }}</dd>
+
+                <dt class="col-sm-4">Incremento automatico</dt>
+                <dd class="col-sm-8">{{ gara.fine_incremento }} minuti</dd>
+
+                <dt class="col-sm-4">Minuti a classifica oscurata</dt>
+                <dd class="col-sm-8">{{ gara.minuti_oscuri }}</dd>
+
+                <dt class="col-sm-4">Squadre nascoste a fine gara</dt>
+                <dd class="col-sm-8">{{ gara.top_n_squadre_nascoste }}</dd>
+
+                <dt class="col-sm-4">Bonus velocità</dt>
+                <dd class="col-sm-8">{{ gara.bonus_risposte|join(", ") if gara.numero_bonus_risposte else "Nessuno" }}</dd>
+
+                <dt class="col-sm-4">Bonus per full</dt>
+                <dd class="col-sm-8">{{ gara.bonus_fullato|join(", ") if gara.numero_bonus_fullato else "Nessuno" }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-4">Tempo per la scelta del jolly</dt>
+            <dd class="col-sm-8">{{ gara.tempo_jolly }} minuti</dd>
+        </dl>
+    </section>
+
+    <details class="review-dropdown mt-4">
+        <summary>{{ "Partecipanti" if gara.is_allenamento else "Squadre" }} ({{ gara.numero_squadre }})</summary>
+        <div class="dropdown-panel">
+        {% if gara.squadre %}
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for squadra in gara.squadre %}
+                            <tr>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>{{ squadra.nome }}</td>
+                                <td>{{ "Ospite" if squadra.is_ospite else "Registrata" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mt-3">Nessun partecipante o squadra specificata.</p>
+        {% endif %}
+        </div>
+    </details>
+
+    <details class="review-dropdown mt-4">
+        <summary>Problemi ({{ gara.numero_problemi }})</summary>
+        <div class="dropdown-panel">
+        {% if gara.problemi %}
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Titolo</th>
+                            <th scope="col">Risultato richiesto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for problema in gara.problemi %}
+                            <tr>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>{{ problema.titolo }}</td>
+                                <td>{{ problema.risultato }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mt-3">Nessun problema specificato.</p>
+        {% endif %}
+        </div>
+    </details>
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+        <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#review-confirmation"
+            data-action="approva"
+            data-confirm-message="Confermi l'approvazione di {{ 'questo allenamento' if gara.is_allenamento else 'questa gara' }}?">
+            Approva richiesta
+        </button>
+        <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#review-confirmation"
+            data-action="elimina"
+            data-confirm-message="Confermi l'eliminazione di questa richiesta? L'operazione non può essere annullata.">
+            Elimina richiesta
+        </button>
+        <a class="btn btn-secondary" href="{{ url_for('area_riservata') }}">Torna all'area riservata</a>
+    </div>
+
+    <div class="modal fade" id="review-confirmation" tabindex="-1" aria-labelledby="review-confirmation-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post" action="{{ url_for('revisiona_gara', gara_id=gara.id) }}">
+                    {{ form.csrf_token }}
+                    {{ form.azione(id="review-action") }}
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="review-confirmation-title">Conferma azione</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                    </div>
+                    <div class="modal-body" id="review-confirmation-message"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Conferma</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{{ url_for('static', filename='js/details_dropdown.js') }}"></script>
+    <script>
+        document.getElementById("review-confirmation").addEventListener("show.bs.modal", function (event) {
+            const trigger = event.relatedTarget;
+            document.getElementById("review-action").value = trigger.dataset.action;
+            document.getElementById("review-confirmation-message").textContent = trigger.dataset.confirmMessage;
+        });
+    </script>
+{% endblock %}

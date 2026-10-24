@@ -26,6 +26,14 @@ class UserManagementForm(FlaskForm):
         ]
     )
 
+class GaraReviewForm(FlaskForm):
+    azione = HiddenField(
+        validators = [
+            DataRequired(),
+            AnyOf(["approva", "elimina"])
+        ]
+    )
+
 
 class ProblemForm(FlaskForm):
     class Meta:

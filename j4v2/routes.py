@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, flash, abort, request, jso
 from flask_login import login_user, logout_user, current_user, login_required
 from j4v2 import app, db, bcrypt
 from j4v2.models import *
-from j4v2.forms import LoginForm, RegistrationForm, RequestForm, UserManagementForm
+from j4v2.forms import LoginForm, RegistrationForm, RequestForm, UserManagementForm, GaraReviewForm
 from j4v2.utils import *
 from j4v2.classifica_builder import *
 from sqlalchemy import or_
@@ -549,3 +549,40 @@ def gestisci_utente(user_id, azione):
     db.session.commit()
     flash(messaggio, "success")
     return redirect(url_for("area_riservata"))
+
+@app.route("/gare/<int:gara_id>/revisiona", methods = ["GET", "POST"])
+@login_required
+def revisiona_gara(gara_id):
+    if current_user.ruolo < 1:
+        abort(403)
+
+    gara = Gara.query.get_or_404(gara_id)
+    if gara.stato != 0:
+        flash("Questa richiesta di gara non è più in attesa di approvazione.", "warning")
+        return redirect(url_for("area_riservata"))
+
+    form = GaraReviewForm()
+    form_valid = form.validate_on_submit()
+    if request.method == "POST" and not form_valid:
+        abort(400)
+
+    if form_valid:
+        if form.azione.data == "approva":
+            gara.stato = 1
+            db.session.commit()
+            flash(f"La richiesta di { 'allenamento' if gara.is_allenamento else 'gara' } «{gara.titolo}» è stata approvata.", "success")
+        elif form.azione.data == "elimina":
+            titolo = gara.titolo
+            is_allenamento = gara.is_allenamento
+            for submission in gara.submissions:
+                db.session.delete(submission)
+            for squadra in gara.squadre:
+                db.session.delete(squadra)
+            for problema in gara.problemi:
+                db.session.delete(problema)
+            db.session.delete(gara)
+            db.session.commit()
+            flash(f"La richiesta di { 'allenamento' if is_allenamento else 'gara' } «{titolo}» è stata eliminata.", "success")
+        return redirect(url_for("area_riservata"))
+
+    return render_template("revisiona_gara.html", title = "Revisiona richiesta gara", gara = gara, form = form)
