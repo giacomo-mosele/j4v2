@@ -4,13 +4,21 @@ from flask import render_template, redirect, url_for, flash, abort, request, jso
 from flask_login import login_user, logout_user, current_user, login_required
 from j4v2 import app, db, bcrypt
 from j4v2.models import *
-from j4v2.forms import LoginForm, RegistrationForm, RequestForm, UserManagementForm, GaraReviewForm
+from j4v2.forms import LoginForm, RegistrationForm, RequestForm, UserManagementForm, GaraReviewForm, CsrfForm
 from j4v2.utils import *
 from j4v2.classifica_builder import *
 from sqlalchemy import or_
 
 import random
 import string
+
+
+def get_gara_approvata_or_404(gara_id):
+    gara = Gara.query.get(gara_id)
+    if not gara or gara.stato == 0:
+        abort(404)
+    return gara
+
 
 @app.before_request
 def aggiorna_database_preprocessor():
@@ -142,9 +150,7 @@ def archivio_gare():
 
 @app.route("/gare/<id>/preview")
 def visualizza_gara(id):
-    gara = Gara.query.get(id)
-    if not gara:
-        abort(404)
+    gara = get_gara_approvata_or_404(id)
     if not gara.is_pubblica:
         if not current_user.is_authenticated:
             abort(401)
@@ -156,9 +162,7 @@ def visualizza_gara(id):
 
 @app.route("/gare/<id>/classifica")
 def classifica(id):
-    gara = Gara.query.get(id)
-    if not gara:
-        abort(404)
+    gara = get_gara_approvata_or_404(id)
     if not gara.is_pubblica:
         if not current_user.is_authenticated:
             abort(401)
@@ -169,9 +173,7 @@ def classifica(id):
 
 @app.route("/gare/<id>/get_classifica_table")
 def get_classifica_table(id):
-    gara = Gara.query.get(id)
-    if not gara:
-        abort(404)
+    gara = get_gara_approvata_or_404(id)
     if not gara.is_pubblica:
         if not current_user.is_authenticated:
             abort(401)
@@ -216,26 +218,33 @@ def get_classifica_table(id):
 
 @app.route("/gare/<id>/gestisci")
 def gestisci_gara(id):
-    gara = Gara.query.get(id)
-    if not gara:
-        abort(404)
+    gara = get_gara_approvata_or_404(id)
     if not current_user.is_authenticated:
         abort(401)
     if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
         abort(403)
 
-    return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara, squadre = gara.squadre, problemi = gara.problemi)
+    return render_template(
+        "gestisci_gara.html",
+        title = "Gestisci_gara",
+        gara = gara,
+        squadre = gara.squadre,
+        problemi = gara.problemi,
+        start_form = CsrfForm(),
+        submission_form = CsrfForm()
+    )
 
 
 @app.route("/gare/<int:id>/start", methods = ["POST"])
 def start_gara_manuale(id):
-    gara = Gara.query.get(id)
-    if not gara:
-        abort(404)
+    gara = get_gara_approvata_or_404(id)
     if not current_user.is_authenticated:
         abort(401)
     if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
         abort(403)
+    form = CsrfForm()
+    if not form.validate_on_submit():
+        abort(400)
     if gara.unix_start is not None or not gara.start_manuale or gara.stato != 1:
         abort(400)
 
@@ -261,6 +270,8 @@ def inserimento_submission_admin():
         abort(400)
 
     gara = Gara.query.get(id_gara)
+    if gara and gara.stato == 0:
+        abort(404)
     squadra = Squadra.query.get(id_squadra)
     if not gara or not squadra or squadra.gara_id != id_gara:
         abort(400)
@@ -268,6 +279,9 @@ def inserimento_submission_admin():
         abort(401)
     if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
         abort(403)
+    form = CsrfForm()
+    if not form.validate_on_submit():
+        abort(400)
     if numero_problema < 1 or numero_problema > gara.numero_problemi:
         abort(400)
 

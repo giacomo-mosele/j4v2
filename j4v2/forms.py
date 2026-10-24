@@ -3,6 +3,9 @@ from flask_login import current_user
 from wtforms import StringField, DateTimeLocalField, IntegerField, PasswordField, BooleanField, SubmitField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, AnyOf
 
+class CsrfForm(FlaskForm):
+    pass
+
 class RegistrationForm(FlaskForm):
     nome = StringField("Nome", validators = [DataRequired()])
     cognome = StringField("Cognome", validators = [DataRequired()])

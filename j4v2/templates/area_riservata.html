@@ -34,7 +34,7 @@
                                 <td>{{ gara.datetime_formattato.datetime_esteso if gara.datetime_formattato else "Non fissato" }}</td>
                                 <td>{{ "Pubblica" if gara.is_pubblica else "Privata" }}</td>
                                 <td>
-                                    {% if (gara.unix_start is none and gara.start_manuale) or (gara.unix_start is not none and gara.unix_start - server_time <= 86400 and gara.unix_start + gara.durata * 60 >= server_time - 86400 ) %}
+                                    {% if gara.stato != 0 and (gara.unix_start is none and gara.start_manuale) or (gara.unix_start is not none and gara.unix_start - server_time <= 86400 and gara.unix_start + gara.durata * 60 >= server_time - 86400 ) %}
                                         <a class="btn btn-primary btn-sm" href="{{ url_for('gestisci_gara', id=gara.id) }}">Gestisci</a>
                                     {% else %}
                                         —

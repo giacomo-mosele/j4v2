@@ -26,6 +26,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <form method="post" action="{{ url_for('start_gara_manuale', id=gara.id) }}">
+                        {{ start_form.csrf_token }}
                         <div class="modal-header">
                             <h2 class="modal-title fs-5" id="start-gara-modal-title">Avvia gara</h2>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
@@ -93,6 +94,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form id="submission-form" method="post" action="{{ url_for('inserimento_submission_admin') }}">
+                    {{ submission_form.csrf_token }}
                     <div class="modal-header">
                         <h2 class="modal-title fs-5" id="submission-modal-title">Inserisci risultato</h2>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>

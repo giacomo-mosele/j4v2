@@ -53,6 +53,15 @@
     background-color: white;
 }
 
+.classifica-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--j4-text-black) transparent;
+}
+
 .classifica-table.classifica-nascosta {
     display: none !important;
 }
