@@ -44,7 +44,7 @@
     object-fit: cover;
 }
 
-a {
+.github-a {
     color: var(--j4-dark-green);
     font-weight: 700;
 }
