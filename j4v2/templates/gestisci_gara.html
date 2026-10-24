@@ -10,7 +10,38 @@
         <h2>{{ gara.titolo }}</h2>
     </div>
 
-    <!-- TODO: pulsante per start manuale -->
+    {% if gara.unix_start is none and gara.start_manuale and gara.stato == 1 %}
+        <div class="mb-4">
+            <button
+                type="button"
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#start-gara-modal"
+            >
+                Avvia gara
+            </button>
+        </div>
+
+        <div class="modal fade" id="start-gara-modal" tabindex="-1" aria-labelledby="start-gara-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" action="{{ url_for('start_gara_manuale', id=gara.id) }}">
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5" id="start-gara-modal-title">Avvia gara</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                        </div>
+                        <div class="modal-body">
+                            Vuoi avviare la gara adesso? L'orario di inizio verrà registrato al momento della conferma.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                            <button type="submit" class="btn btn-success">Conferma avvio</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
     <div class="inserimento-header">
         <h1 id="inserimentoH1">Inserimento</h1>
@@ -22,7 +53,7 @@
                 <tr>
                     <th scope="col"></th>
                     {% for problema in problemi %}
-                        <th scope="col">{{ problema.titolo }} P{{ loop.index }}</th>
+                        <th scope="col">P{{ loop.index }}</th>
                     {% endfor %}
                 </tr>
             </thead>

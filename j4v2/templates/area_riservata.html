@@ -9,6 +9,48 @@
     <h4>Login effettuato come {{ current_user.username }}</h4>
     <h4>{{ ruolo_text }}</h4>
 
+    <details class="management-dropdown mt-4">
+        <summary>Gare {{ 'richieste' if current_user.ruolo == 0 else 'fissate' }} da te</summary>
+        <div class="dropdown-panel">
+        {% if gare_richieste %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Titolo</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Stato</th>
+                            <th scope="col">Inizio</th>
+                            <th scope="col">Visibilità</th>
+                            <th scope="col">Gestione</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gara in gare_richieste %}
+                            <tr>
+                                <td>{{ gara.titolo }}</td>
+                                <td>{{ "Allenamento" if gara.is_allenamento else "Gara" }}</td>
+                                <td>{{ stati_gara.get(gara.stato, "Sconosciuto") }}</td>
+                                <td>{{ gara.datetime_formattato.datetime_esteso if gara.datetime_formattato else "Non fissato" }}</td>
+                                <td>{{ "Pubblica" if gara.is_pubblica else "Privata" }}</td>
+                                <td>
+                                    {% if (gara.unix_start is none and gara.start_manuale) or (gara.unix_start is not none and gara.unix_start - server_time <= 86400 and gara.unix_start + gara.durata * 60 >= server_time - 86400 ) %}
+                                        <a class="btn btn-primary btn-sm" href="{{ url_for('gestisci_gara', id=gara.id) }}">Gestisci</a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Attualmente non sono previste gare o allenamenti da te richiesti</p>
+        {% endif %}
+        </div>
+    </details>
+
     {% if current_user.ruolo >= 1 %}
         <details class="management-dropdown mt-4">
             <summary>Gestione richieste di gare e allenamenti</summary>
@@ -194,8 +236,8 @@
 {% endblock %}
 
 {% block extra_script %}
+    <script src="{{ url_for('static', filename='js/details_dropdown.js') }}"></script>
     {% if current_user.ruolo >= 1 %}
-        <script src="{{ url_for('static', filename='js/details_dropdown.js') }}"></script>
         <script>
             document.getElementById("confirm-user-action").addEventListener("show.bs.modal", function (event) {
                 const trigger = event.relatedTarget;

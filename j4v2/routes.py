@@ -178,13 +178,13 @@ def get_classifica_table(id):
         if current_user.ruolo < 1 and current_user not in gara.user_spettatori and current_user != gara.richiedente:
             abort(403)
 
-    if gara.unix_start and not gara.start_manuale:
+    if gara.unix_start:
         update_from_submissions(gara)
 
     secondi_passati = 0
 
     tempo_label = "Non è stato ancora fissato l'inizio di questa gara"
-    if ( gara.unix_start and not gara.start_manuale ):
+    if (gara.unix_start):
         secondi_passati = int(datetime.now(timezone.utc).timestamp()) - gara.unix_start
         if secondi_passati < 0:
             tempo_label = f"La gara inizierà alle {gara.datetime_formattato['orario']}"
@@ -224,7 +224,26 @@ def gestisci_gara(id):
     if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
         abort(403)
 
-    return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara.basic_dict(), squadre = gara.squadre, problemi = gara.problemi)
+    return render_template("gestisci_gara.html", title = "Gestisci_gara", gara = gara, squadre = gara.squadre, problemi = gara.problemi)
+
+
+@app.route("/gare/<int:id>/start", methods = ["POST"])
+def start_gara_manuale(id):
+    gara = Gara.query.get(id)
+    if not gara:
+        abort(404)
+    if not current_user.is_authenticated:
+        abort(401)
+    if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
+        abort(403)
+    if gara.unix_start is not None or not gara.start_manuale or gara.stato != 1:
+        abort(400)
+
+    gara.unix_start = int(datetime.now(timezone.utc).timestamp())
+    gara.stato = 2
+    db.session.commit()
+    flash("La gara è iniziata.", "success")
+    return redirect(url_for("gestisci_gara", id = id))
 
 
 @app.route("/inserimento/submission_admin", methods = ["POST"])
@@ -492,10 +511,39 @@ def area_riservata():
             "Bannati": User.query.filter_by(ruolo = -2).order_by(User.username).all()
         }
 
+    gare_richieste_da_approvare = Gara.query.filter(
+        Gara.richiedente_id == current_user.id,
+        Gara.stato == 0
+    ).all()
+
+    gare_richieste_da_startare = Gara.query.filter(
+        Gara.richiedente_id == current_user.id,
+        Gara.stato == 1,
+        Gara.start_manuale == True,
+        Gara.unix_start == None
+    ).order_by(Gara.id).all()
+
+    gare_richieste_non_da_startare = Gara.query.filter(
+        Gara.richiedente_id == current_user.id,
+        Gara.stato == 1,
+        or_(
+            Gara.start_manuale == False,
+            Gara.unix_start != None
+        )
+    ).order_by(-Gara.unix_start).all()
+
     return render_template(
         "area_riservata.html",
         title = "Area riservata",
         ruolo_text = ruoli_text_dict.get(current_user.ruolo, "Ruolo sconosciuto"),
+        gare_richieste = gare_richieste_da_approvare + gare_richieste_da_startare + gare_richieste_non_da_startare,
+        server_time = int(datetime.now(timezone.utc).timestamp()),
+        stati_gara = {
+            0: "In attesa di approvazione",
+            1: "In programma",
+            2: "In corso",
+            3: "Terminata"
+        },
         richieste_account = richieste_account,
         richieste_gare = richieste_gare,
         utenti_per_ruolo = utenti_per_ruolo,
