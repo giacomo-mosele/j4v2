@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
-from wtforms import StringField, DateTimeLocalField, IntegerField, PasswordField, BooleanField, SubmitField, FieldList, FormField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange
+from wtforms import StringField, DateTimeLocalField, IntegerField, PasswordField, BooleanField, SubmitField, FieldList, FormField, HiddenField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, AnyOf
 
 class RegistrationForm(FlaskForm):
     nome = StringField("Nome", validators = [DataRequired()])
@@ -17,6 +17,14 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators = [DataRequired()])
     remember = BooleanField("Ricordami")
     submit = SubmitField("Login")
+
+class UserManagementForm(FlaskForm):
+    azione = HiddenField(
+        validators = [
+            DataRequired(),
+            AnyOf(["approva", "elimina_richiesta", "promuovi", "declassa", "banna", "sbanna"])
+        ]
+    )
 
 
 class ProblemForm(FlaskForm):

@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, flash, abort, request, jso
 from flask_login import login_user, logout_user, current_user, login_required
 from j4v2 import app, db, bcrypt
 from j4v2.models import *
-from j4v2.forms import LoginForm, RegistrationForm, RequestForm
+from j4v2.forms import LoginForm, RegistrationForm, RequestForm, UserManagementForm
 from j4v2.utils import *
 from j4v2.classifica_builder import *
 from sqlalchemy import or_
@@ -337,7 +337,7 @@ def richiedi_gara():
                 titolo = form.titolo.data,
                 unix_start = italian_to_unix(form.datetime_start.data) if form.start_manuale.data is False else None,
                 start_manuale = form.start_manuale.data,
-                stato = 0 if current_user.ruolo == 0 else 1,
+                stato = 0 if current_user.ruolo <= 0 else 1,
                 richiedente_id = current_user.id,
                 is_allenamento = form.is_allenamento.data,
                 is_pubblica = not form.is_privata.data,
@@ -479,4 +479,73 @@ def logout():
 @app.route("/area_riservata")
 @login_required
 def area_riservata():
-    return render_template("area_riservata.html", title = "Area riservata", ruolo_text = ruoli_text_dict.get(current_user.ruolo, "Ruolo sconosciuto"))
+    richieste_account = []
+    richieste_gare = []
+    utenti_per_ruolo = {}
+    if current_user.ruolo >= 1:
+        richieste_account = User.query.filter_by(ruolo = -1).order_by(User.username).all()
+        richieste_gare = Gara.query.filter_by(stato = 0).order_by(Gara.id).all()
+        utenti_per_ruolo = {
+            "Utenti": User.query.filter_by(ruolo = 0).order_by(User.username).all(),
+            "Admin": User.query.filter_by(ruolo = 1).order_by(User.username).all(),
+            "Developer": User.query.filter_by(ruolo = 2).order_by(User.username).all(),
+            "Bannati": User.query.filter_by(ruolo = -2).order_by(User.username).all()
+        }
+
+    return render_template(
+        "area_riservata.html",
+        title = "Area riservata",
+        ruolo_text = ruoli_text_dict.get(current_user.ruolo, "Ruolo sconosciuto"),
+        richieste_account = richieste_account,
+        richieste_gare = richieste_gare,
+        utenti_per_ruolo = utenti_per_ruolo,
+        gestione_utente_form = UserManagementForm()
+    )
+
+@app.route("/utenti/<int:user_id>/<azione>", methods = ["POST"])
+@login_required
+def gestisci_utente(user_id, azione):
+    if current_user.ruolo < 1:
+        abort(403)
+    form = UserManagementForm()
+    if not form.validate_on_submit() or form.azione.data != azione:
+        abort(400)
+
+    utente = User.query.get_or_404(user_id)
+    if utente.id == current_user.id:
+        flash("Non puoi modificare il ruolo o lo stato del tuo stesso account.", "danger")
+        return redirect(url_for("area_riservata"))
+
+    if azione in ("approva", "elimina_richiesta"):
+        if utente.ruolo != -1:
+            flash("Questa richiesta non è più in attesa di approvazione.", "warning")
+        elif azione == "approva":
+            utente.ruolo = 0
+            db.session.commit()
+            flash(f"L'account {utente.username} è stato abilitato.", "success")
+        else:
+            usn = utente.username
+            db.session.delete(utente)
+            db.session.commit()
+            flash(f"La richiesta di creazione dell'account {usn} è stata eliminata.", "success")
+        return redirect(url_for("area_riservata"))
+
+    is_developer = current_user.ruolo == 2
+    if azione == "promuovi" and utente.ruolo == 0:
+        utente.ruolo = 1
+        messaggio = f"{utente.username} è stato promosso ad admin."
+    elif azione == "declassa" and is_developer and utente.ruolo == 1:
+        utente.ruolo = 0
+        messaggio = f"{utente.username} è stato declassato a utente."
+    elif azione == "banna" and (utente.ruolo == 0 or (is_developer and utente.ruolo == 1)):
+        utente.ruolo = -2
+        messaggio = f"{utente.username} è stato bannato."
+    elif azione == "sbanna" and utente.ruolo == -2:
+        utente.ruolo = 0
+        messaggio = f"{utente.username} è stato sbannato ed è ora un utente."
+    else:
+        abort(403)
+
+    db.session.commit()
+    flash(messaggio, "success")
+    return redirect(url_for("area_riservata"))
