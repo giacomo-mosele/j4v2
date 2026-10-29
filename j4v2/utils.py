@@ -131,6 +131,9 @@ def request_find_mistake(form):
         if number < minimum:
             return f"Il campo '{label}' deve essere maggiore o uguale a {minimum}."
 
+        if field_name == "top_n_squadre_nascoste" and number == 1:
+            return "Il numero di squadre da nascondere deve essere 0 oppure almeno 2."
+
     if (not hasattr(form, "datetime_start") or form.datetime_start.data is None) and form.start_manuale.data is False:
         return "Inserire una data e ora di inizio valida."
 

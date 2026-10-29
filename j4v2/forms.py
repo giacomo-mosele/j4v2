@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms import StringField, DateTimeLocalField, IntegerField, PasswordField, BooleanField, SubmitField, FieldList, FormField, HiddenField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange, AnyOf
+from wtforms.validators import DataRequired, InputRequired, Length, Email, EqualTo, NumberRange, AnyOf, ValidationError
 
 class CsrfForm(FlaskForm):
     pass
@@ -43,7 +43,7 @@ class ProblemForm(FlaskForm):
         csrf = False
 
     titolo = StringField("Titolo")
-    risultato = IntegerField("Risultato", validators = [DataRequired(), NumberRange(min = 0, max = 9999)])
+    risultato = IntegerField("Risultato", validators = [InputRequired(), NumberRange(min = 0, max = 9999)])
 
 class SquadraForm(FlaskForm):
     class Meta:
@@ -52,20 +52,27 @@ class SquadraForm(FlaskForm):
     nome = StringField("Nome squadra")
     is_ospite = BooleanField("Ospite")
 
+def validate_top_n_squadre_nascoste(form, field):
+    if field.data == 1:
+        raise ValidationError("Il numero di squadre da nascondere deve essere 0 oppure almeno 2.")
+
 class RequestForm(FlaskForm):
     is_allenamento = BooleanField("Allenamento")
 
     titolo = StringField("Titolo della gara", validators = [DataRequired()])
     start_manuale = BooleanField("Avvio manuale")
     datetime_start = DateTimeLocalField("Data e ora di inizio della gara", format="%Y-%m-%dT%H:%M", validators = [DataRequired()])
-    durata = IntegerField("Durata (in minuti)", validators = [DataRequired(), NumberRange(min = 1)])
-    n = IntegerField("n =", validators = [DataRequired(), NumberRange(min = 0)])
-    fine_incremento = IntegerField("Minuti di incremento automatico", validators = [DataRequired(), NumberRange(min = 0)])
-    tempo_jolly = IntegerField("Minuti per la scelta del jolly", validators = [DataRequired(), NumberRange(min = 1)])
+    durata = IntegerField("Durata (in minuti)", validators = [InputRequired(), NumberRange(min = 1)])
+    n = IntegerField("n =", validators = [InputRequired(), NumberRange(min = 0)])
+    fine_incremento = IntegerField("Minuti di incremento automatico", validators = [InputRequired(), NumberRange(min = 0)])
+    tempo_jolly = IntegerField("Minuti per la scelta del jolly", validators = [InputRequired(), NumberRange(min = 1)])
     bonus_risposte_string = StringField("Bonus velocità (inserire i valori separati da virgola, ad esempio \"15,10,5\")")
     bonus_fullato_string = StringField("Bonus per chi fulla (inserire i valori separati da virgola, ad esempio \"100,80,60\")")
-    minuti_oscuri = IntegerField("Minuti a classifica oscurata", validators = [DataRequired(), NumberRange(min = 0)])
-    top_n_squadre_nascoste = IntegerField("Squadre nascoste a fine gara", validators = [DataRequired(), NumberRange(min=0)])
+    minuti_oscuri = IntegerField("Minuti a classifica oscurata", validators = [InputRequired(), NumberRange(min = 0)])
+    top_n_squadre_nascoste = IntegerField(
+        "Squadre nascoste a fine gara",
+        validators = [InputRequired(), NumberRange(min = 0), validate_top_n_squadre_nascoste]
+    )
 
     problemi = FieldList(FormField(ProblemForm), min_entries = 1, label = "Problemi (lascia i titoli vuoti per generarli automaticamente)")
     squadre = FieldList(FormField(SquadraForm), min_entries = 1, label = "Inserisci i nomi delle squadre che parteciperanno")
@@ -157,10 +164,14 @@ class RequestForm(FlaskForm):
             self.bonus_risposte_string.data = ""
             self.bonus_fullato_string.data = ""
         else:
-            self.n.validators = [DataRequired(), NumberRange(min = 0)]
-            self.fine_incremento.validators = [DataRequired(), NumberRange(min = 0)]
-            self.top_n_squadre_nascoste.validators = [DataRequired(), NumberRange(min = 0)]
-            self.minuti_oscuri.validators = [DataRequired(), NumberRange(min = 0)]
+            self.n.validators = [InputRequired(), NumberRange(min = 0)]
+            self.fine_incremento.validators = [InputRequired(), NumberRange(min = 0)]
+            self.top_n_squadre_nascoste.validators = [
+                InputRequired(),
+                NumberRange(min = 0),
+                validate_top_n_squadre_nascoste
+            ]
+            self.minuti_oscuri.validators = [InputRequired(), NumberRange(min = 0)]
             self.n.flags.required = True
             self.fine_incremento.flags.required = True
             self.top_n_squadre_nascoste.flags.required = True
