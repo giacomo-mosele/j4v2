@@ -1,11 +1,46 @@
+.content > p {
+    text-align: center;
+}
+
 .gara-link {
-    display: inline-block;
+    display: block;
     margin-top: 10px;
     color: var(--j4-dark-green);
     font-weight: 700;
     text-decoration: none;
+    text-align: center;
 }
 
 .gara-link:hover {
     text-decoration: underline;
+}
+
+.content h1,
+.content h3 {
+    text-align: center;
+}
+
+.colonne-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;   /* 1 elemento al centro, 2 affiancati, ultima riga centrata */
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.colonne-item {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+    box-sizing: border-box;
+    padding: 6px 12px;
+    text-align: center;
+}
+
+.content h1 {
+    margin-bottom: 30px;
+}
+
+.content h3 {
+    margin-top: 36px;         
+    margin-bottom: 12px;
 }

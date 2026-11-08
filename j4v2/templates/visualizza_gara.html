@@ -11,14 +11,17 @@
     <p>Durata: {{ gara.durata }} minuti</p>
 
     <h3>{{ 'Partecipanti:' if gara.is_allenamento else 'Squadre iscritte:' }}</h3>
-    {% for squadra in gara.squadre %}
-        <p>{{ squadra.nome + (" (ospite)" if squadra.is_ospite else "") }}</p>
-    {% endfor %}
-    
-    <h3>Problemi:</h3>
-    {% for problema in gara.problemi %}
-        <p>{{ problema.titolo }}</p>
-    {% endfor %}
+    <div class="colonne-grid">
+        {% for squadra in gara.squadre %}
+            <div class="colonne-item">{{ squadra.nome + (" (ospite)" if squadra.is_ospite else "") }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="colonne-grid">
+        {% for problema in gara.problemi %}
+            <div class="colonne-item">{{ problema.titolo }}</div>
+        {% endfor %}
+    </div>
 
     <a class="gara-link" href="/gare/{{ gara.id }}/classifica">{{ 'Vedi tabellone' if gara.is_allenamento else 'Vedi classifica' }}</a>
 {% endblock %}
