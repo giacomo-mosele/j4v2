@@ -107,7 +107,7 @@ def request_find_mistake(form):
 
     for field_name, label, minimum in [
         ("durata", "Durata", 1),
-        ("n", "n", 0),
+        ("n", "n", 1),
         ("fine_incremento", "Minuti di incremento automatico", 0),
         ("tempo_jolly", "Minuti per la scelta del jolly", 0),
         ("minuti_oscuri", "Minuti a classifica oscurata", 0),

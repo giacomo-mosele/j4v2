@@ -63,7 +63,7 @@ class RequestForm(FlaskForm):
     start_manuale = BooleanField("Avvio manuale")
     datetime_start = DateTimeLocalField("Data e ora di inizio della gara", format="%Y-%m-%dT%H:%M", validators = [DataRequired()])
     durata = IntegerField("Durata (in minuti)", validators = [InputRequired(), NumberRange(min = 1)])
-    n = IntegerField("n =", validators = [InputRequired(), NumberRange(min = 0)])
+    n = IntegerField("n =", validators = [InputRequired(), NumberRange(min = 1)], render_kw = {"min": 1})
     fine_incremento = IntegerField("Minuti di incremento automatico", validators = [InputRequired(), NumberRange(min = 0)])
     tempo_jolly = IntegerField("Minuti per la scelta del jolly", validators = [InputRequired(), NumberRange(min = 1)])
     bonus_risposte_string = StringField("Bonus velocità (inserire i valori separati da virgola, ad esempio \"15,10,5\")")
@@ -164,7 +164,7 @@ class RequestForm(FlaskForm):
             self.bonus_risposte_string.data = ""
             self.bonus_fullato_string.data = ""
         else:
-            self.n.validators = [InputRequired(), NumberRange(min = 0)]
+            self.n.validators = [InputRequired(), NumberRange(min = 1)]
             self.fine_incremento.validators = [InputRequired(), NumberRange(min = 0)]
             self.top_n_squadre_nascoste.validators = [
                 InputRequired(),

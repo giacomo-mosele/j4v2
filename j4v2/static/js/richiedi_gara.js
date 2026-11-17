@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
             nField.disabled = isAllenamento;
             nField.required = !isAllenamento;
             nField.value = isAllenamento ? "0" : nField.value;
+            nField.min = isAllenamento ? "0" : "1";
         }
 
         if (fineIncrementoField) {
