@@ -1,5 +1,8 @@
 .content > p {
     text-align: center;
+    margin: 2px 0;
+    font-size: 0.95rem;
+    color: #2d4a2d;
 }
 
 .gara-link {
@@ -29,8 +32,8 @@
 }
 
 .colonne-item {
-    flex: 0 0 33.333%;
-    max-width: 33.333%;
+    flex: 0 0 100%;
+    max-width: 100%;
     box-sizing: border-box;
     padding: 6px 12px;
     text-align: center;

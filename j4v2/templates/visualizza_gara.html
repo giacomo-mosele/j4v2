@@ -17,11 +17,5 @@
         {% endfor %}
     </div>
 
-    <div class="colonne-grid">
-        {% for problema in gara.problemi %}
-            <div class="colonne-item">{{ problema.titolo }}</div>
-        {% endfor %}
-    </div>
-
     <a class="gara-link" href="/gare/{{ gara.id }}/classifica">{{ 'Vedi tabellone' if gara.is_allenamento else 'Vedi classifica' }}</a>
 {% endblock %}
