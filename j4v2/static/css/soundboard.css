@@ -1,0 +1,61 @@
+.content {
+    text-align: center;
+}
+
+#titleH1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: var(--j4-text-black);
+    font-size: 60px;
+}
+
+.sfx-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 20px;
+    width: 100%;
+    margin: 28px auto 0;
+}
+
+.sfx-card {
+    min-width: 0;
+    padding: 18px;
+    border-radius: 10px;
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+.sfx-name {
+    margin: 0 0 14px;
+    color: var(--j4-text-black);
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.sfx-card audio {
+    display: block;
+    width: 100%;
+}
+
+.sfx-card audio::-webkit-media-controls-volume-control-container,
+.sfx-card audio::-webkit-media-controls-volume-slider,
+.sfx-card audio::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+.sfx-card audio::-webkit-media-controls-overflow-button,
+.sfx-card audio::-webkit-media-controls-playback-rate-button,
+.sfx-card audio::-webkit-media-controls-download-button {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    #titleH1 {
+        font-size: 44px;
+    }
+
+    .sfx-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+}

@@ -648,3 +648,11 @@ def revisiona_gara(gara_id):
         return redirect(url_for("area_riservata"))
 
     return render_template("revisiona_gara.html", title = "Revisiona richiesta gara", gara = gara, form = form)
+
+@app.route("/soundboard")
+def soundboard():
+    directory_sfx = os.path.join(os.path.dirname(__file__), "static", "sfx")
+    filenames = [f for f in os.listdir(directory_sfx) if os.path.isfile(os.path.join(directory_sfx, f))]
+    filenames.sort()
+
+    return render_template("soundboard.html", title = "Soundboard", filenames = filenames)

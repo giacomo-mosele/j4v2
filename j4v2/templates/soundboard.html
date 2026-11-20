@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/soundboard.css">
+{% endblock %}
+
+{% block content %}
+    <h1 id="titleH1">Soundboard</h1>
+    <h4 id="subtitleH4">Meme vari dagli utilizzi più disparati</h4>
+    <section class="sfx-grid" aria-label="Sound effects">
+        {% for filename in filenames %}
+            <article class="sfx-card">
+                <h2 class="sfx-name">{{ filename.rsplit('.', 1)[0].replace('_', ' ') }}</h2>
+                <audio controls controlslist="nodownload" preload="none" aria-label="Riproduci {{ filename.rsplit('.', 1)[0].replace('_', ' ') }}">
+                    <source src="{{ url_for('static', filename='sfx/' ~ filename) }}" type="audio/mpeg">
+                    Il tuo browser non supporta la riproduzione audio.
+                </audio>
+            </article>
+        {% endfor %}
+    </section>
+{% endblock %}

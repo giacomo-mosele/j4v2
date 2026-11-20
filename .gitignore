@@ -13,5 +13,6 @@ debug.py
 
 j4v2/static/images/meme/*
 !j4v2/static/images/meme/cane.png
+j4v2/static/sfx/*
 
 COMANDI_GIT.txt
