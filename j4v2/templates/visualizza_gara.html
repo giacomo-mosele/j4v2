@@ -7,7 +7,7 @@
 {% block content %}
     <h1>{{ gara.titolo }}</h1>
 
-    <p>Inizio: {{ gara.datetime_formattato.datetime_esteso }}</p>
+    <p>Inizio: {{ gara.datetime_formattato.datetime_esteso if gara.unix_start != None else 'non ancora fissato' }}</p>
     <p>Durata: {{ gara.durata }} minuti</p>
 
     <h3>{{ 'Partecipanti:' if gara.is_allenamento else 'Squadre iscritte:' }}</h3>

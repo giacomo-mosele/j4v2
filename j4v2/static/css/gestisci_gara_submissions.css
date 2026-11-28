@@ -86,3 +86,8 @@
 .inserimento-table td:nth-child(n + 2) {
     min-width: 66px;
 }
+
+.submission-disattivata-td {
+    color: red !important;
+    font-weight: bold !important;
+}

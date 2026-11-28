@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from flask import render_template, redirect, url_for, flash, abort, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
@@ -232,6 +233,38 @@ def gestisci_gara(id):
         problemi = gara.problemi,
         start_form = CsrfForm(),
         submission_form = CsrfForm()
+    )
+
+@app.route("/gare/<id>/gestisci/submissions")
+def gestisci_submissions(id):
+    gara = get_gara_approvata_or_404(id)
+    if not current_user.is_authenticated:
+        abort(401)
+    if current_user.ruolo < 1 and current_user not in gara.user_controllanti and current_user != gara.richiedente:
+        abort(403)
+
+    indice_squadre = { squadra.id: indice for indice, squadra in enumerate(gara.squadre, start = 1) }
+    indice_problemi = { problema.id: indice for indice, problema in enumerate(gara.problemi, start = 1) }
+
+    submissions = [
+        {
+            "submission": submission,
+            "indice": indice,
+            "timestamp": datetime.fromtimestamp(
+                submission.unix_time,
+                tz = timezone.utc
+            ).astimezone(ZoneInfo("Europe/Rome")).strftime("%d/%m/%Y - %H:%M:%S"),
+            "codice_squadra": indice_squadre[submission.squadra_id],
+            "numero_problema": indice_problemi[submission.problema_id],
+        }
+        for indice, submission in enumerate(gara.submissions, start = 1)
+    ]
+
+    return render_template(
+        "gestisci_submissions.html",
+        title = "Gestisci submissions",
+        gara = gara,
+        submissions = submissions
     )
 
 

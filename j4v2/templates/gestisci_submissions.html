@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/gestisci_gara_submissions.css">
+{% endblock %}
+
+{% block content %}
+    <div class="gestisci-header">
+        <h1 id="titleH1">Gestisci submissions</h1>
+        <h2>{{ gara.titolo }}</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">ID nel database</th>
+                    <th scope="col">Orario</th>
+                    <th scope="col">Attiva / disattivata</th>
+                    <th scope="col">Squadra (Codice)</th>
+                    <th scope="col">Problema</th>
+                    <th scope="col">Risultato</th>
+                    <th scope="col">Esito</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for riga in submissions %}
+                    {% set submission = riga.submission %}
+                    <tr>
+                        <th scope="row">{{ riga.indice }}</th>
+                        <td>{{ submission.id }}</td>
+                        <td>{{ riga.timestamp }}</td>
+                        <td class="{{ '' if submission.is_enabled else 'submission-disattivata-td'}}">{{ "Attiva" if submission.is_enabled else "DISATTIVATA" }}</td>
+                        <td>{{ submission.squadra.nome }} ({{ riga.codice_squadra }})</td>
+                        <td>{{ riga.numero_problema }}</td>
+                        {% if submission.is_scelta_jolly %}
+                            <td>
+                                JOLLY
+                                ({{ "prima della risoluzione" if submission.stato_jolly == 1 else "dopo la risoluzione" }})
+                            </td>
+                            <td></td>
+                        {% else %}
+                            <td>{{ submission.risultato }}</td>
+                            <td>{{ "Giusto" if submission.is_corretta else "Sbagliato" }}</td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">Non ci sono submission per questa gara.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
